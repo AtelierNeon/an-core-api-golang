@@ -1,0 +1,17 @@
+{
+    "[go]": {
+        "editor.defaultFormatter": "golang.go",
+        "editor.formatOnSave": true
+    },
+    "[json]": {
+        "editor.formatOnSave": true
+    },
+    "[powershell]": {
+        "editor.formatOnSave": true,
+        "editor.wordWrapColumn": 240
+    },
+    "[shellscript]": {
+        "editor.formatOnSave": true,
+        "editor.wordWrapColumn": 240
+    }
+}

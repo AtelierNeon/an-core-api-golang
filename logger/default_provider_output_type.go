@@ -1,0 +1,10 @@
+package logger
+
+type DefaultProviderOutputType int32
+
+const (
+	DefaultProviderOutputTypeDefault DefaultProviderOutputType = iota
+	DefaultProviderOutputTypeStandardOutput
+	DefaultProviderOutputTypeStandardError
+	DefaultProviderOutputTypeSuppressed
+)
