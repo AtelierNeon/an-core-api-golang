@@ -62,7 +62,7 @@ func getFullTypeName(t reflect.Type) string {
 	result := ""
 	pkgPath := t.PkgPath()
 	if pkgPath != "" {
-		result += pkgPath + "."
+		result = pkgPath + "."
 	}
 	result += t.Name()
 	return result

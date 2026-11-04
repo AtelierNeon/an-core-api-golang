@@ -15,7 +15,7 @@ $GoCli = 'go'
 ####
 #### Project level config
 ####
-$ProjectGoVersion = if ($Env:MY_PROJECT_GO_VERSION) { $Env:MY_PROJECT_GO_VERSION } else { '1.21.13' }
+$ProjectGoVersion = if ($Env:MY_PROJECT_GO_VERSION) { $Env:MY_PROJECT_GO_VERSION } else { '1.23.12' }
 $ProjectUseDefaultGoCli = if ($Env:MY_PROJECT_USE_DEFAULT_GO_CLI) { $Env:MY_PROJECT_USE_DEFAULT_GO_CLI } else { 'OFF' }
 
 ##
@@ -265,38 +265,33 @@ Write-Information "[PowerShell] Building project ... Fetching project dependenci
 
 ## Build project - Run go test
 Write-Information "[PowerShell] Building Project ... Running go test ..."
-if ('ON'.Equals($ProjectShouldDisableUnitTest)) {
-    Write-Information "[PowerShell] Building Project ... Running go test ... SKIPPED"
-}
-else {
-    $Env:GOARCH = ''
-    $MyGoProcess = $null
-    $MyGoProcessHandle = $null
-    try {
-        $MyGoProcess = Start-Process -FilePath "$MyProjectGoCli" -NoNewWindow -PassThru `
-            -ArgumentList "test -short -cover ./..."
-        $MyGoProcessHandle = $MyGoProcess.Handle
-        $MyGoProcess.WaitForExit()
-        $MyGoProcessExitCode = $MyGoProcess.ExitCode
-        if ($MyGoProcessExitCode -ne 0) {
-            Write-Error "[PowerShell] Building Project ... Running go test ... FAILED (ExitCode: $MyGoProcessExitCode)"
-            Exit 1
-        }
-    }
-    catch {
-        Write-Error "[PowerShell] Building Project ... Running go test ... FAILED (Project GO SDK is missing)"
+$Env:GOARCH = ''
+$MyGoProcess = $null
+$MyGoProcessHandle = $null
+try {
+    $MyGoProcess = Start-Process -FilePath "$MyProjectGoCli" -NoNewWindow -PassThru `
+        -ArgumentList "test -short -cover ./..."
+    $MyGoProcessHandle = $MyGoProcess.Handle
+    $MyGoProcess.WaitForExit()
+    $MyGoProcessExitCode = $MyGoProcess.ExitCode
+    if ($MyGoProcessExitCode -ne 0) {
+        Write-Error "[PowerShell] Building Project ... Running go test ... FAILED (ExitCode: $MyGoProcessExitCode)"
         Exit 1
     }
-    finally {
-        if ($null -ne $MyGoProcessHandle) {
-            $MyGoProcessHandle = $null
-        }
-        if ($null -ne $MyGoProcess) {
-            $MyGoProcess.Dispose()
-            $MyGoProcess = $null
-        }
-    }
-    Write-Information "[PowerShell] Building Project ... Running go test ... DONE"
 }
+catch {
+    Write-Error "[PowerShell] Building Project ... Running go test ... FAILED (Project GO SDK is missing)"
+    Exit 1
+}
+finally {
+    if ($null -ne $MyGoProcessHandle) {
+        $MyGoProcessHandle = $null
+    }
+    if ($null -ne $MyGoProcess) {
+        $MyGoProcess.Dispose()
+        $MyGoProcess = $null
+    }
+}
+Write-Information "[PowerShell] Building Project ... Running go test ... DONE"
 
 Write-Information "[PowerShell] Building project ... DONE"
