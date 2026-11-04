@@ -4,6 +4,7 @@ import (
 	"errors"
 	"os"
 	"reflect"
+	"sync"
 
 	"github.com/AtelierNeon/an-core-api-golang/internal"
 )
@@ -12,6 +13,7 @@ var (
 	providerInstanceType = reflect.TypeOf((*DefaultProvider)(nil)).Elem()
 	providerType         = reflect.TypeOf((*Provider)(nil)).Elem()
 	instances            = make(map[string]Logger)
+	instancesMutex       = &sync.Mutex{}
 	severity             = SeverityTypeDebug
 	showPackageName      = false
 )
@@ -46,6 +48,9 @@ func doGetInstanceWithLabel(
 }
 
 func GetDefaultProviderOutput() DefaultProviderOutputType {
+	defaultProvider_outputMutex.Lock()
+	defer defaultProvider_outputMutex.Unlock()
+
 	return defaultProvider_output
 }
 
@@ -68,6 +73,9 @@ func GetInstance() Logger {
 }
 
 func GetInstanceWithLabel(label string) Logger {
+	instancesMutex.Lock()
+	defer instancesMutex.Unlock()
+
 	instance, err := doGetInstanceWithLabel(
 		providerInstanceType,
 		label,
@@ -94,6 +102,9 @@ func Register(t reflect.Type) {
 		panic("registered type must be a non-pointer type whose pointer implements Provider")
 	}
 
+	instancesMutex.Lock()
+	defer instancesMutex.Unlock()
+
 	if providerInstanceType == t {
 		return
 	}
@@ -108,5 +119,8 @@ func Register(t reflect.Type) {
 }
 
 func SetDefaultProviderOutput(output DefaultProviderOutputType) {
+	defaultProvider_outputMutex.Lock()
+	defer defaultProvider_outputMutex.Unlock()
+
 	defaultProvider_output = output
 }

@@ -3,6 +3,7 @@ package logger
 import (
 	"fmt"
 	"os"
+	"sync"
 
 	"github.com/AtelierNeon/an-core-api-golang/internal"
 )
@@ -12,7 +13,8 @@ type DefaultProvider struct {
 }
 
 var (
-	defaultProvider_output DefaultProviderOutputType = DefaultProviderOutputTypeStandardOutput
+	defaultProvider_output      DefaultProviderOutputType = DefaultProviderOutputTypeStandardOutput
+	defaultProvider_outputMutex                           = &sync.Mutex{}
 )
 
 func doPrint(
@@ -20,6 +22,9 @@ func doPrint(
 	tag string,
 	message string) error {
 	line := fmt.Sprintf("[%s][%s] %s", level, tag, message)
+
+	defaultProvider_outputMutex.Lock()
+	defer defaultProvider_outputMutex.Unlock()
 
 	switch defaultProvider_output {
 	case DefaultProviderOutputTypeStandardOutput:

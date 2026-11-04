@@ -4,14 +4,16 @@ import (
 	"fmt"
 	"os"
 	"runtime"
+	"sync"
 
 	"github.com/AtelierNeon/an-core-api-golang/internal"
 )
 
 type DefaultLogger struct {
 	Logger
-	provider Provider
-	severity SeverityType
+	provider      Provider
+	severity      SeverityType
+	severityMutex sync.Mutex
 }
 
 func (dl *DefaultLogger) Debug(message string) {
@@ -204,6 +206,9 @@ func (dl *DefaultLogger) FatalF(format string, args ...any) {
 }
 
 func (dl *DefaultLogger) GetSeverity() SeverityType {
+	dl.severityMutex.Lock()
+	defer dl.severityMutex.Unlock()
+
 	return dl.severity
 }
 
@@ -334,6 +339,9 @@ func (dl *DefaultLogger) WarnF(format string, args ...any) {
 }
 
 func (dl *DefaultLogger) SetSeverity(s SeverityType) Logger {
+	dl.severityMutex.Lock()
+	defer dl.severityMutex.Unlock()
+
 	dl.severity = s
 	return dl
 }
