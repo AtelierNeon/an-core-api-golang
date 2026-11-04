@@ -59,6 +59,10 @@ func getFullTypeName(t reflect.Type) string {
 		return ""
 	}
 
+	for t.Kind() == reflect.Pointer && t.Name() == "" {
+		t = t.Elem()
+	}
+
 	result := ""
 	pkgPath := t.PkgPath()
 	if pkgPath != "" {

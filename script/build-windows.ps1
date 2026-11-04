@@ -8,6 +8,7 @@ $InformationPreference = 'Continue'
 ## Global config
 ##
 $GoCli = 'go'
+$ProjectFolder = Join-Path -Path $PSScriptRoot -ChildPath '..'
 
 ##
 ## Project config
@@ -69,30 +70,30 @@ Write-Information "[PowerShell] Detecting GO SDK ... FOUND"
 
 
 
-## Detect GOPATH
-$MyGoPath = ''
-Write-Information "[PowerShell] Detecting GOPATH ..."
+## Detect GOBIN
+$MyGoBin = ''
+Write-Information "[PowerShell] Detecting GOBIN ..."
 try {
     $MyGoProcessStartInfo = New-Object System.Diagnostics.ProcessStartInfo
     $MyGoProcessStartInfo.FileName = $GoCli
     $MyGoProcessStartInfo.RedirectStandardError = $true
     $MyGoProcessStartInfo.RedirectStandardOutput = $true
     $MyGoProcessStartInfo.UseShellExecute = $false
-    $MyGoProcessStartInfo.Arguments = "env GOPATH"
+    $MyGoProcessStartInfo.Arguments = "env GOBIN"
     $MyGoProcess = New-Object System.Diagnostics.Process
     $MyGoProcess.StartInfo = $MyGoProcessStartInfo
     $MyGoProcess.Start() | Out-Null
     $MyGoProcessHandle = $MyGoProcess.Handle
     $MyGoProcess.WaitForExit()
     $MyGoProcessExitCode = $MyGoProcess.ExitCode
-    $MyGoPath = $MyGoProcess.StandardOutput.ReadToEnd()
+    $MyGoBin = $MyGoProcess.StandardOutput.ReadToEnd()
     if ($MyGoProcessExitCode -ne 0) {
-        Write-Error "[PowerShell] Detecting GOPATH ... FAILED (ExitCode: $MyGoProcessExitCode)"
+        Write-Error "[PowerShell] Detecting GOBIN ... FAILED (ExitCode: $MyGoProcessExitCode)"
         Exit 1
     }
-    $MyGoPath = $MyGoPath.Trim()
-    if (''.Equals($MyGoPath)) {
-        Write-Error "[PowerShell] Detecting GOPATH ... FAILED (Empty)"
+    $MyGoBin = $MyGoBin.Trim()
+    if (''.Equals($MyGoBin)) {
+        Write-Error "[PowerShell] Detecting GOBIN ... FAILED (Empty)"
         Exit 1
     }
 }
@@ -109,19 +110,19 @@ finally {
         $MyGoProcess = $null
     }
 }
-Write-Information "[PowerShell] Detecting GOPATH ... DONE"
+Write-Information "[PowerShell] Detecting GOBIN ... DONE"
 
 
 
-## Add GOPATH\bin into PATH
-Write-Information "[PowerShell] Adding GOPATH\bin into PATH ..."
-$MyGoPathBin = "$MyGoPath\bin"
-if ($Env:Path -contains $MyGoPathBin) {
-    Write-Information "[PowerShell] Adding GOPATH\bin into PATH ... SKIPPED"
+## Add GOBIN into PATH
+Write-Information "[PowerShell] Adding GOBIN into PATH ..."
+$MyGoBinDir = "$MyGoBin"
+if ($Env:Path -contains $MyGoBinDir) {
+    Write-Information "[PowerShell] Adding GOBIN into PATH ... SKIPPED"
 }
 else {
-    $Env:Path = "$MyGoPathBin;" + $Env:Path
-    Write-Information "[PowerShell] Adding GOPATH\bin into PATH ... DONE"
+    $Env:Path = "$MyGoBinDir;" + $Env:Path
+    Write-Information "[PowerShell] Adding GOBIN into PATH ... DONE"
 }
 
 
@@ -232,6 +233,7 @@ if (-not $MyProjectGoCliDetected) {
 
 ## Build project
 Write-Information "[PowerShell] Building project ..."
+Set-Location -LiteralPath (Join-Path $PSScriptRoot '..') -ErrorAction Stop
 
 ## Build project - Fetch project dependencies
 $MyGoProcess = $null
