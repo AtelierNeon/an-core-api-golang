@@ -13,8 +13,8 @@ type DefaultProvider struct {
 }
 
 var (
-	defaultProvider_output      DefaultProviderOutputType = DefaultProviderOutputTypeStandardOutput
-	defaultProvider_outputMutex                           = &sync.Mutex{}
+	defaultProvider_outputType      DefaultProviderOutputType = DefaultProviderOutputTypeStandardOutput
+	defaultProvider_outputTypeMutex                           = &sync.Mutex{}
 )
 
 func doPrint(
@@ -23,10 +23,9 @@ func doPrint(
 	message string) error {
 	line := fmt.Sprintf("[%s][%s] %s", level, tag, message)
 
-	defaultProvider_outputMutex.Lock()
-	defer defaultProvider_outputMutex.Unlock()
+	outputType := GetDefaultProviderOutputType()
 
-	switch defaultProvider_output {
+	switch outputType {
 	case DefaultProviderOutputTypeStandardOutput:
 		internal.Fprintln(os.Stdout, line)
 		return nil
@@ -41,7 +40,7 @@ func doPrint(
 	return nil
 }
 
-func (cp *DefaultProvider) OnDebug(tag string, message string) error {
+func (dp *DefaultProvider) OnDebug(tag string, message string) error {
 	return doPrint(
 		"Debug",
 		tag,
@@ -49,7 +48,7 @@ func (cp *DefaultProvider) OnDebug(tag string, message string) error {
 	)
 }
 
-func (cp *DefaultProvider) OnError(tag string, message string) error {
+func (dp *DefaultProvider) OnError(tag string, message string) error {
 	return doPrint(
 		"Error",
 		tag,
@@ -57,7 +56,7 @@ func (cp *DefaultProvider) OnError(tag string, message string) error {
 	)
 }
 
-func (cp *DefaultProvider) OnFatal(tag string, message string) error {
+func (dp *DefaultProvider) OnFatal(tag string, message string) error {
 	return doPrint(
 		"Fatal",
 		tag,
@@ -65,7 +64,7 @@ func (cp *DefaultProvider) OnFatal(tag string, message string) error {
 	)
 }
 
-func (cp *DefaultProvider) OnInfo(tag string, message string) error {
+func (dp *DefaultProvider) OnInfo(tag string, message string) error {
 	return doPrint(
 		"Info",
 		tag,
@@ -73,7 +72,7 @@ func (cp *DefaultProvider) OnInfo(tag string, message string) error {
 	)
 }
 
-func (cp *DefaultProvider) OnWarn(tag string, message string) error {
+func (dp *DefaultProvider) OnWarn(tag string, message string) error {
 	return doPrint(
 		"Warn",
 		tag,
@@ -81,7 +80,7 @@ func (cp *DefaultProvider) OnWarn(tag string, message string) error {
 	)
 }
 
-func (cp *DefaultProvider) OnTrace(tag string, message string) error {
+func (dp *DefaultProvider) OnTrace(tag string, message string) error {
 	return doPrint(
 		"Trace",
 		tag,

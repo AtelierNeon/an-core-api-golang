@@ -47,11 +47,11 @@ func doGetInstanceWithLabel(
 	return instance, nil
 }
 
-func GetDefaultProviderOutput() DefaultProviderOutputType {
-	defaultProvider_outputMutex.Lock()
-	defer defaultProvider_outputMutex.Unlock()
+func GetDefaultProviderOutputType() DefaultProviderOutputType {
+	defaultProvider_outputTypeMutex.Lock()
+	defer defaultProvider_outputTypeMutex.Unlock()
 
-	return defaultProvider_output
+	return defaultProvider_outputType
 }
 
 func getFullTypeName(t reflect.Type) string {
@@ -118,9 +118,9 @@ func Register(t reflect.Type) {
 	)
 }
 
-func SetDefaultProviderOutput(output DefaultProviderOutputType) {
-	defaultProvider_outputMutex.Lock()
-	defer defaultProvider_outputMutex.Unlock()
+func SetDefaultProviderOutputType(output DefaultProviderOutputType) {
+	defaultProvider_outputTypeMutex.Lock()
+	defer defaultProvider_outputTypeMutex.Unlock()
 
-	defaultProvider_output = output
+	defaultProvider_outputType = output
 }
