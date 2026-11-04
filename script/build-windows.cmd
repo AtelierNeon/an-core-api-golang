@@ -4,7 +4,7 @@ rem Start delaying variable expansion
 setlocal ENABLEDELAYEDEXPANSION
 
 rem Set project root
-set PROJECT_ROOT=%~dp0\..
+set "PROJECT_ROOT=%~dp0\.."
 
 rem Detect PowerShell
 echo [Windows] Detecting PowerShell Core ...

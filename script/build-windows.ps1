@@ -238,7 +238,7 @@ $MyGoProcess = $null
 $MyGoProcessHandle = $null
 Write-Information "[PowerShell] Building project ... Fetching project dependencies ..."
 try {
-    $MyGoProcess = Start-Process -FilePath "$GoCli" -NoNewWindow -PassThru `
+    $MyGoProcess = Start-Process -FilePath "$MyProjectGoCli" -NoNewWindow -PassThru `
         -ArgumentList "mod tidy"
     $MyGoProcessHandle = $MyGoProcess.Handle
     $MyGoProcess.WaitForExit()

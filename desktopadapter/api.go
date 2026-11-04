@@ -23,7 +23,6 @@ func ConfigureWithConfig(config *Config) bool {
 
 	internal.DisableLogging(realConfig.DisableInternalLogger)
 
-	logger.SetDefaultProviderOutputType(logger.DefaultProviderOutputTypeSuppressed)
 	logger.Register(loggerProviderInstanceType)
 
 	return true
