@@ -2,10 +2,13 @@ package linuxprocfs
 
 import (
 	"fmt"
-	"io"
 	"os"
 	"strconv"
 	"strings"
+)
+
+var (
+	shouldFallbackToCmdline = false
 )
 
 func GetProcessNameByID(processID int) (string, error) {
@@ -23,7 +26,7 @@ func GetProcessNameByID(processID int) (string, error) {
 
 func GetProcessPathByID(processID int) (string, error) {
 	result, err := getProcessPathByIDFromExe(processID)
-	if err != nil {
+	if err != nil && shouldFallbackToCmdline {
 		result, err = getProcessPathByIDFromCmdline(processID)
 	}
 
@@ -32,7 +35,7 @@ func GetProcessPathByID(processID int) (string, error) {
 
 func GetProcessIDListByName(processName string) ([]int, error) {
 	result, err := getProcessIDListByNameFromExe(processName)
-	if err != nil {
+	if err != nil && shouldFallbackToCmdline {
 		result, err = getProcessIDListByNameFromCmdline(processName)
 	}
 
@@ -101,21 +104,13 @@ func getProcessIDListByNameFromExe(processName string) ([]int, error) {
 
 func getProcessPathByIDFromCmdline(processID int) (string, error) {
 	path := fmt.Sprintf("/proc/%d/cmdline", processID)
-
-	file, err := os.OpenFile(path, os.O_RDONLY, 0o440)
-	if err != nil {
-		return "", err
-	}
-	defer file.Close()
-
-	reader := io.LimitReader(file, 1024)
-	buffer, err := io.ReadAll(reader)
+	data, err := os.ReadFile(path)
 	if err != nil {
 		return "", err
 	}
 
-	data := strings.Split(string(buffer), "\x00")
-	return strings.TrimSpace(data[0]), nil
+	tokens := strings.Split(string(data), "\x00")
+	return strings.TrimSpace(tokens[0]), nil
 }
 
 func getProcessPathByIDFromExe(processID int) (string, error) {
