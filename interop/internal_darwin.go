@@ -6,7 +6,7 @@ import (
 )
 
 const (
-	ProcPidPathInfoSize = 0x400
+	procPidPathInfoSize = 0x400
 )
 
 // We should also define the relative entry in assembly (*.s)
@@ -18,6 +18,14 @@ var libc_proc_listpids_trampoline_addr uintptr
 //
 //go:cgo_import_dynamic libc_proc_pidpath proc_pidpath "/usr/lib/libSystem.B.dylib"
 var libc_proc_pidpath_trampoline_addr uintptr
+
+func BufferToString(buffer []byte) string {
+	return runtime_gostring(&buffer[0])
+}
+
+func NewProcPidpathBuffer() []byte {
+	return make([]byte, procPidPathInfoSize)
+}
 
 //go:nosplit
 func ProcListpids(

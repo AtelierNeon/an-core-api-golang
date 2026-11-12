@@ -9,25 +9,6 @@ import (
 
 type ProcessID int32
 
-func GetProcessPathByProcessID(processID ProcessID) (string, error) {
-	buffer := make([]byte, ProcPidPathInfoSize)
-	r1, _, errno := ProcPidpath(
-		processID,
-		unsafe.Pointer(&buffer[0]),
-		uint32(len(buffer)),
-	)
-	kernelReturnType := KernelReturnType(errno)
-	if kernelReturnType != KernelReturnTypeSuccess {
-		return "", errors.New(kernelReturnType.String())
-	}
-
-	if r1 == 0 {
-		return "", errors.New("failed to get process path")
-	}
-
-	return runtime_gostring(&buffer[0]), nil
-}
-
 func GetRunningProcessIDList() ([]int, error) {
 	r1, _, errno := ProcListpids(
 		processInfoTypeAllPIDs,

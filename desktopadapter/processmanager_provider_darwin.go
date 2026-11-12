@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/AtelierNeon/an-core-api-golang/interop"
+	"github.com/AtelierNeon/an-core-api-golang/interop/darwinlibproc"
 )
 
 func (pmp *ProcessManagerProvider) OnGetProcessIDListByName(processName string) ([]int, error) {
@@ -42,12 +43,7 @@ func (pmp *ProcessManagerProvider) OnGetProcessNameByID(processID int) (string, 
 
 func (pmp *ProcessManagerProvider) OnGetProcessPathByID(processID int) (string, error) {
 	pid := interop.ProcessID(processID)
-	processPath, processPathErr := interop.GetProcessPathByProcessID(pid)
-	if processPathErr != nil {
-		return "", processPathErr
-	}
-
-	return processPath, nil
+	return darwinlibproc.GetProcessPathByProcessID(pid)
 }
 
 func (pmp *ProcessManagerProvider) OnIsCurrentProcessRunningAsNonUser() bool {
