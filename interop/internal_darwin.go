@@ -6,7 +6,7 @@ import (
 )
 
 const (
-	procPidPathInfoSize = 0x400
+	ProcPidPathInfoSize = 0x400
 )
 
 // We should also define the relative entry in assembly (*.s)
@@ -20,7 +20,7 @@ var libc_proc_listpids_trampoline_addr uintptr
 var libc_proc_pidpath_trampoline_addr uintptr
 
 //go:nosplit
-func proc_listpids(
+func ProcListpids(
 	processInfoType ProcessInfoType,
 	processInfo uint32,
 	buffer unsafe.Pointer,
@@ -37,7 +37,7 @@ func proc_listpids(
 }
 
 //go:nosplit
-func proc_pidpath(
+func ProcPidpath(
 	processID ProcessID,
 	buffer unsafe.Pointer,
 	bufferSize uint32) (r1, r2 uintptr, err syscall.Errno) {

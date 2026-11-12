@@ -10,8 +10,8 @@ import (
 type ProcessID int32
 
 func GetProcessPathByProcessID(processID ProcessID) (string, error) {
-	buffer := make([]byte, procPidPathInfoSize)
-	_, _, errno := proc_pidpath(
+	buffer := make([]byte, ProcPidPathInfoSize)
+	r1, _, errno := ProcPidpath(
 		processID,
 		unsafe.Pointer(&buffer[0]),
 		uint32(len(buffer)),
@@ -21,11 +21,15 @@ func GetProcessPathByProcessID(processID ProcessID) (string, error) {
 		return "", errors.New(kernelReturnType.String())
 	}
 
+	if r1 == 0 {
+		return "", errors.New("failed to get process path")
+	}
+
 	return runtime_gostring(&buffer[0]), nil
 }
 
 func GetRunningProcessIDList() ([]int, error) {
-	r1, _, errno := proc_listpids(
+	r1, _, errno := ProcListpids(
 		processInfoTypeAllPIDs,
 		0,
 		nil,
@@ -36,9 +40,13 @@ func GetRunningProcessIDList() ([]int, error) {
 		return nil, errors.New(kernelReturnType.String())
 	}
 
+	if r1 == 0 {
+		return nil, errors.New("failed to get running process ID list")
+	}
+
 	bufferSize := uint32(r1)
 	buffer := make([]byte, bufferSize)
-	_, _, errno = proc_listpids(
+	r1, _, errno = ProcListpids(
 		processInfoTypeAllPIDs,
 		0,
 		unsafe.Pointer(&buffer[0]),
@@ -47,6 +55,10 @@ func GetRunningProcessIDList() ([]int, error) {
 	kernelReturnType = KernelReturnType(errno)
 	if kernelReturnType != KernelReturnTypeSuccess {
 		return nil, errors.New(kernelReturnType.String())
+	}
+
+	if r1 == 0 {
+		return nil, errors.New("failed to get running process ID list")
 	}
 
 	var pprocessID int32
