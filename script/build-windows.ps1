@@ -14,13 +14,13 @@ $ProjectFolder = Join-Path -Path $PSScriptRoot -ChildPath '..'
 ## Project config
 ##
 ####
-#### Project level config
+#### Project-level config
 ####
 $ProjectGoVersion = if ($Env:MY_PROJECT_GO_VERSION) { $Env:MY_PROJECT_GO_VERSION } else { '1.23.12' }
 $ProjectUseDefaultGoCli = if ($Env:MY_PROJECT_USE_DEFAULT_GO_CLI) { $Env:MY_PROJECT_USE_DEFAULT_GO_CLI } else { 'OFF' }
 
 ##
-## My Variables
+## My variables
 ##
 $MyProjectGoCli = $GoCli + $ProjectGoVersion
 $MyProjectGoCliDetected = $false
@@ -98,7 +98,7 @@ try {
     }
 }
 catch {
-    Write-Error "[PowerShell] Detecting GOPATH ... FAILED"
+    Write-Error "[PowerShell] Detecting GOBIN ... FAILED"
     Exit 1
 }
 finally {
@@ -116,20 +116,19 @@ Write-Information "[PowerShell] Detecting GOBIN ... DONE"
 
 ## Add GOBIN into PATH
 Write-Information "[PowerShell] Adding GOBIN into PATH ..."
-$MyGoBinDir = "$MyGoBin"
-if ($Env:Path -contains $MyGoBinDir) {
+if ($Env:Path -contains $MyGoBin) {
     Write-Information "[PowerShell] Adding GOBIN into PATH ... SKIPPED"
 }
 else {
-    $Env:Path = "$MyGoBinDir;" + $Env:Path
+    $Env:Path = "$MyGoBin;" + $Env:Path
     Write-Information "[PowerShell] Adding GOBIN into PATH ... DONE"
 }
 
 
 
 ## Detect project GO SDK
-Write-Information "[PowerShell] Detecting project GO SDK ..."
 if (-not $MyProjectGoCliDetected) {
+    Write-Information "[PowerShell] Detecting project GO SDK ..."
     $MyGoProcess = $null
     $MyGoProcessHandle = $null
     try {
@@ -233,7 +232,7 @@ if (-not $MyProjectGoCliDetected) {
 
 ## Build project
 Write-Information "[PowerShell] Building project ..."
-Set-Location -LiteralPath (Join-Path $PSScriptRoot '..') -ErrorAction Stop
+Set-Location -LiteralPath $ProjectFolder -ErrorAction Stop
 
 ## Build project - Fetch project dependencies
 $MyGoProcess = $null
@@ -266,7 +265,7 @@ finally {
 Write-Information "[PowerShell] Building project ... Fetching project dependencies ... DONE"
 
 ## Build project - Run go test
-Write-Information "[PowerShell] Building Project ... Running go test ..."
+Write-Information "[PowerShell] Building project ... Running go test ..."
 $Env:GOARCH = ''
 $MyGoProcess = $null
 $MyGoProcessHandle = $null
@@ -277,12 +276,12 @@ try {
     $MyGoProcess.WaitForExit()
     $MyGoProcessExitCode = $MyGoProcess.ExitCode
     if ($MyGoProcessExitCode -ne 0) {
-        Write-Error "[PowerShell] Building Project ... Running go test ... FAILED (ExitCode: $MyGoProcessExitCode)"
+        Write-Error "[PowerShell] Building project ... Running go test ... FAILED (ExitCode: $MyGoProcessExitCode)"
         Exit 1
     }
 }
 catch {
-    Write-Error "[PowerShell] Building Project ... Running go test ... FAILED (Project GO SDK is missing)"
+    Write-Error "[PowerShell] Building project ... Running go test ... FAILED (Project GO SDK is missing)"
     Exit 1
 }
 finally {
@@ -294,6 +293,6 @@ finally {
         $MyGoProcess = $null
     }
 }
-Write-Information "[PowerShell] Building Project ... Running go test ... DONE"
+Write-Information "[PowerShell] Building project ... Running go test ... DONE"
 
 Write-Information "[PowerShell] Building project ... DONE"
