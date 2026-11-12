@@ -7,10 +7,6 @@ import (
 	"strings"
 )
 
-var (
-	shouldFallbackToCmdline = false
-)
-
 func GetProcessNameByID(processID int) (string, error) {
 	path := fmt.Sprintf("/proc/%d/stat", processID)
 	buffer, err := os.ReadFile(path)
@@ -26,7 +22,7 @@ func GetProcessNameByID(processID int) (string, error) {
 
 func GetProcessPathByID(processID int) (string, error) {
 	result, err := getProcessPathByIDFromExe(processID)
-	if err != nil && shouldFallbackToCmdline {
+	if err != nil {
 		result, err = getProcessPathByIDFromCmdline(processID)
 	}
 
@@ -35,7 +31,7 @@ func GetProcessPathByID(processID int) (string, error) {
 
 func GetProcessIDListByName(processName string) ([]int, error) {
 	result, err := getProcessIDListByNameFromExe(processName)
-	if err != nil && shouldFallbackToCmdline {
+	if err != nil {
 		result, err = getProcessIDListByNameFromCmdline(processName)
 	}
 
