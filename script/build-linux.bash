@@ -15,7 +15,7 @@ PROJECT_DIR=$SCRIPT_DIR/..
 ## Project config
 ##
 ####
-#### Project-level Config
+#### Project-level config
 ####
 PROJECT_GO_VERSION="${MY_PROJECT_GO_VERSION:=1.23.12}"
 PROJECT_USE_DEFAULT_GO_CLI="${MY_PROJECT_USE_DEFAULT_GO_CLI:=OFF}"
