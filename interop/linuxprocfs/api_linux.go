@@ -6,8 +6,6 @@ import (
 	"os"
 	"strconv"
 	"strings"
-
-	"golang.org/x/sys/unix"
 )
 
 func GetProcessNameByID(processID int) (string, error) {
@@ -122,12 +120,5 @@ func getProcessPathByIDFromCmdline(processID int) (string, error) {
 
 func getProcessPathByIDFromExe(processID int) (string, error) {
 	path := fmt.Sprintf("/proc/%d/exe", processID)
-
-	var buffer [1024]byte
-	bufferRead, err := unix.Readlink(path, buffer[:])
-	if err != nil {
-		return "", err
-	}
-
-	return string(buffer[:bufferRead]), nil
+	return os.Readlink(path)
 }
