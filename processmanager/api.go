@@ -1,0 +1,113 @@
+package processmanager
+
+import (
+	"errors"
+	"os"
+	"reflect"
+	"sync"
+
+	"github.com/AtelierNeon/an-core-api-golang/internal"
+)
+
+var (
+	instances            = make(map[string]ProcessManager)
+	instancesMutex       = &sync.Mutex{}
+	providerInstanceType = reflect.TypeFor[DefaultProvider]()
+	providerType         = reflect.TypeFor[Provider]()
+)
+
+func doGetInstanceWithLabel(
+	t reflect.Type,
+	label string) (ProcessManager, error) {
+	if t == nil {
+		return nil, errors.New("reflect.Type is not found")
+	}
+
+	providerFullTypeName := getFullTypeName(t)
+	key := providerFullTypeName + "_" + label
+	if instance, ok := instances[key]; ok {
+		return instance, nil
+	}
+
+	internal.Fprintf(
+		os.Stderr,
+		"Initializing %s...\n",
+		key,
+	)
+
+	providerInstance := reflect.New(t).Interface().(Provider)
+	instance := &DefaultProcessManager{
+		provider: providerInstance,
+	}
+
+	instances[key] = instance
+	return instance, nil
+}
+
+func getFullTypeName(t reflect.Type) string {
+	if t == nil {
+		return ""
+	}
+
+	for t.Kind() == reflect.Pointer && t.Name() == "" {
+		t = t.Elem()
+	}
+
+	result := ""
+	pkgPath := t.PkgPath()
+	if pkgPath != "" {
+		result = pkgPath + "."
+	}
+	result += t.Name()
+	return result
+}
+
+func GetInstance() ProcessManager {
+	return GetInstanceWithLabel("")
+}
+
+func GetInstanceWithLabel(label string) ProcessManager {
+	instancesMutex.Lock()
+	defer instancesMutex.Unlock()
+
+	instance, err := doGetInstanceWithLabel(
+		providerInstanceType,
+		label,
+	)
+	if err != nil {
+		panic("Can not get instance")
+	}
+
+	return instance
+}
+
+func GetInstanceWithType(t reflect.Type) ProcessManager {
+	fullTypeName := getFullTypeName(t)
+	if fullTypeName != "" {
+		return GetInstanceWithLabel(fullTypeName)
+	}
+
+	return GetInstance()
+}
+
+func Register(t reflect.Type) {
+	if t == nil || t.Kind() == reflect.Pointer ||
+		!reflect.PointerTo(t).Implements(providerType) {
+		panic("registered type must be a non-pointer type whose pointer implements Provider")
+	}
+
+	instancesMutex.Lock()
+	defer instancesMutex.Unlock()
+
+	if providerInstanceType == t {
+		return
+	}
+
+	providerInstanceType = t
+	internal.Fprintf(
+		os.Stderr,
+		"Registered default %s type to %s\n",
+		reflect.TypeFor[Provider]().Name(),
+		providerInstanceType.Name(),
+	)
+}

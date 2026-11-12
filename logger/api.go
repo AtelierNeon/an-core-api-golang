@@ -10,10 +10,10 @@ import (
 )
 
 var (
-	providerInstanceType = reflect.TypeOf((*DefaultProvider)(nil)).Elem()
-	providerType         = reflect.TypeOf((*Provider)(nil)).Elem()
 	instances            = make(map[string]Logger)
 	instancesMutex       = &sync.Mutex{}
+	providerInstanceType = reflect.TypeFor[DefaultProvider]()
+	providerType         = reflect.TypeFor[Provider]()
 	severity             = SeverityTypeDebug
 	showPackageName      = false
 )
@@ -117,7 +117,7 @@ func Register(t reflect.Type) {
 	internal.Fprintf(
 		os.Stderr,
 		"Registered default %s type to %s\n",
-		reflect.TypeOf((*Provider)(nil)).Elem().Name(),
+		reflect.TypeFor[Provider]().Name(),
 		providerInstanceType.Name(),
 	)
 }
