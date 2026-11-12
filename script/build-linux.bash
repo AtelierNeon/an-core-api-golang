@@ -51,25 +51,25 @@ echo "[$SYSTEM_PLATFORM] Detecting GO SDK ... FOUND"
 
 
 
-## Detect GOBIN
-echo "[$SYSTEM_PLATFORM] Detecting GOBIN ..."
-MY_GOBIN=$($GO_CLI env GOBIN)
+## Detect GOPATH
+echo "[$SYSTEM_PLATFORM] Detecting GOPATH ..."
+MY_GOPATH=$($GO_CLI env GOPATH)
 MY_CHECK_RESULT=$?
 if [ $MY_CHECK_RESULT -ne 0 ] ; then
-    echo "[$SYSTEM_PLATFORM] Detecting GOBIN ... FAILED"
+    echo "[$SYSTEM_PLATFORM] Detecting GOPATH ... FAILED"
     exit 1
 fi
-echo "[$SYSTEM_PLATFORM] Detecting GOBIN ... DONE"
+echo "[$SYSTEM_PLATFORM] Detecting GOPATH ... DONE"
 
 
 
-## Add GOBIN into PATH
-echo "[$SYSTEM_PLATFORM] Adding GOBIN into PATH ..."
-if [[ $PATH == *$MY_GOBIN* ]]; then
-    echo "[$SYSTEM_PLATFORM] Adding GOBIN into PATH ... SKIPPED"
+## Add GOPATH/bin into PATH
+echo "[$SYSTEM_PLATFORM] Adding GOPATH/bin into PATH ..."
+if [[ $PATH == *$MY_GOPATH/bin* ]]; then
+    echo "[$SYSTEM_PLATFORM] Adding GOPATH/bin into PATH ... SKIPPED"
 else
-    PATH=$MY_GOBIN:$PATH
-    echo "[$SYSTEM_PLATFORM] Adding GOBIN into PATH ... DONE"
+    PATH=$MY_GOPATH/bin:$PATH
+    echo "[$SYSTEM_PLATFORM] Adding GOPATH/bin into PATH ... DONE"
 fi
 
 

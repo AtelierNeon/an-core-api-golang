@@ -70,16 +70,16 @@ Write-Information "[PowerShell] Detecting GO SDK ... FOUND"
 
 
 
-## Detect GOBIN
+## Detect GOPATH
 $MyGoBin = ''
-Write-Information "[PowerShell] Detecting GOBIN ..."
+Write-Information "[PowerShell] Detecting GOPATH ..."
 try {
     $MyGoProcessStartInfo = New-Object System.Diagnostics.ProcessStartInfo
     $MyGoProcessStartInfo.FileName = $GoCli
     $MyGoProcessStartInfo.RedirectStandardError = $true
     $MyGoProcessStartInfo.RedirectStandardOutput = $true
     $MyGoProcessStartInfo.UseShellExecute = $false
-    $MyGoProcessStartInfo.Arguments = "env GOBIN"
+    $MyGoProcessStartInfo.Arguments = "env GOPATH"
     $MyGoProcess = New-Object System.Diagnostics.Process
     $MyGoProcess.StartInfo = $MyGoProcessStartInfo
     $MyGoProcess.Start() | Out-Null
@@ -88,17 +88,17 @@ try {
     $MyGoProcessExitCode = $MyGoProcess.ExitCode
     $MyGoBin = $MyGoProcess.StandardOutput.ReadToEnd()
     if ($MyGoProcessExitCode -ne 0) {
-        Write-Error "[PowerShell] Detecting GOBIN ... FAILED (ExitCode: $MyGoProcessExitCode)"
+        Write-Error "[PowerShell] Detecting GOPATH ... FAILED (ExitCode: $MyGoProcessExitCode)"
         Exit 1
     }
     $MyGoBin = $MyGoBin.Trim()
     if (''.Equals($MyGoBin)) {
-        Write-Error "[PowerShell] Detecting GOBIN ... FAILED (Empty)"
+        Write-Error "[PowerShell] Detecting GOPATH ... FAILED (Empty)"
         Exit 1
     }
 }
 catch {
-    Write-Error "[PowerShell] Detecting GOBIN ... FAILED"
+    Write-Error "[PowerShell] Detecting GOPATH ... FAILED"
     Exit 1
 }
 finally {
@@ -110,18 +110,18 @@ finally {
         $MyGoProcess = $null
     }
 }
-Write-Information "[PowerShell] Detecting GOBIN ... DONE"
+Write-Information "[PowerShell] Detecting GOPATH ... DONE"
 
 
 
-## Add GOBIN into PATH
-Write-Information "[PowerShell] Adding GOBIN into PATH ..."
-if ($Env:Path -contains $MyGoBin) {
-    Write-Information "[PowerShell] Adding GOBIN into PATH ... SKIPPED"
+## Add GOPATH/bin into PATH
+Write-Information "[PowerShell] Adding GOPATH/bin into PATH ..."
+if ($Env:Path -contains "$MyGoBin\bin") {
+    Write-Information "[PowerShell] Adding GOPATH/bin into PATH ... SKIPPED"
 }
 else {
-    $Env:Path = "$MyGoBin;" + $Env:Path
-    Write-Information "[PowerShell] Adding GOBIN into PATH ... DONE"
+    $Env:Path = "$MyGoBin\bin;" + $Env:Path
+    Write-Information "[PowerShell] Adding GOPATH/bin into PATH ... DONE"
 }
 
 
