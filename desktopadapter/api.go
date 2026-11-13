@@ -5,10 +5,12 @@ import (
 
 	"github.com/AtelierNeon/an-core-api-golang/internal"
 	"github.com/AtelierNeon/an-core-api-golang/logger"
+	"github.com/AtelierNeon/an-core-api-golang/processmanager"
 )
 
 var (
-	loggerProviderInstanceType = reflect.TypeFor[LogrusProvider]()
+	loggerProviderInstanceType         = reflect.TypeFor[LogrusProvider]()
+	processManagerProviderInstanceType = reflect.TypeFor[ProcessManagerProvider]()
 )
 
 func Configure() bool {
@@ -24,6 +26,7 @@ func ConfigureWithConfig(config *Config) bool {
 	internal.DisableLogging(realConfig.DisableInternalLogger)
 
 	logger.Register(loggerProviderInstanceType)
+	processmanager.Register(processManagerProviderInstanceType)
 
 	return true
 }

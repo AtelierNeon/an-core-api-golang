@@ -9,7 +9,7 @@ import (
 
 func setupSuite(tb testing.TB) func(tb testing.TB) {
 	// Something to setup
-	//logger.GetInstance().SetLevel(logger.Info)
+	//logger.GetInstance().SetSeverity(logger.SeverityTypeInfo)
 
 	return func(tb testing.TB) {
 		// Something to teardown
