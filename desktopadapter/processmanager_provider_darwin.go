@@ -9,18 +9,19 @@ import (
 
 func (pmp *ProcessManagerProvider) OnGetProcessIDListByName(processName string) ([]int, error) {
 	value := []int{}
-	processIdList, processIdListErr := interop.GetRunningProcessIDList()
+	processIdList, processIdListErr := darwinlibproc.GetRunningProcessIDList()
 	if processIdListErr != nil {
 		return value, processIdListErr
 	}
 
 	for _, processId := range processIdList {
-		processName2, processName2Err := pmp.OnGetProcessNameByID(processId)
+		pid := int(processId)
+		processName2, processName2Err := pmp.OnGetProcessNameByID(pid)
 		if processName2Err != nil {
 			continue
 		}
 		if processName2 == processName {
-			value = append(value, processId)
+			value = append(value, pid)
 		}
 	}
 
