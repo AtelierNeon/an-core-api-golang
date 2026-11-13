@@ -146,7 +146,7 @@ func getProcessPathByIDFromCmdline(processID int) (string, error) {
 	tokens := strings.Split(string(data), "\x00")
 	result := strings.TrimSpace(tokens[0])
 	if result == "" {
-		return "", fmt.Errorf("process %d has no executable path", processID)
+		return "", os.ErrNotExist
 	}
 	return result, nil
 }
