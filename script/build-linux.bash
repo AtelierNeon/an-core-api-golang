@@ -103,7 +103,7 @@ fi
 
 ## Add GOBIN or GOPATH/bin into PATH
 echo "[$SYSTEM_PLATFORM] Adding GOBIN or GOPATH/bin into PATH ..."
-if [[ $PATH == *$MY_PROJECT_GO_BIN* ]]; then
+if [[ ":$PATH:" == *":$MY_PROJECT_GO_BIN:"* ]]; then
     echo "[$SYSTEM_PLATFORM] Adding GOBIN or GOPATH/bin into PATH ... SKIPPED"
 else
     PATH=$MY_PROJECT_GO_BIN:$PATH
