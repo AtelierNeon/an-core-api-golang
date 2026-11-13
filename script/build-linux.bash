@@ -23,6 +23,8 @@ PROJECT_USE_DEFAULT_GO_CLI="${MY_PROJECT_USE_DEFAULT_GO_CLI:=OFF}"
 ##
 ## My variables
 ##
+MY_PROJECT_GO_BIN=""
+MY_PROJECT_GO_BIN_DETECTED=false
 MY_PROJECT_GO_CLI=$GO_CLI$PROJECT_GO_VERSION
 MY_PROJECT_GO_CLI_DETECTED=false
 MY_PROJECT_GO_VERSION=$PROJECT_GO_VERSION
@@ -51,25 +53,61 @@ echo "[$SYSTEM_PLATFORM] Detecting GO SDK ... FOUND"
 
 
 
+## Detect GOBIN
+if [ "$MY_PROJECT_GO_BIN_DETECTED" = "false" ] ; then
+    echo "[$SYSTEM_PLATFORM] Detecting GOBIN ..."
+    MY_GOBIN=$($GO_CLI env GOBIN)
+    MY_CHECK_RESULT=$?
+    if [ $MY_CHECK_RESULT -ne 0 ] ; then
+        echo "[$SYSTEM_PLATFORM] Detecting GOBIN ... FAILED (ExitCode: $MY_CHECK_RESULT)"
+        MY_PROJECT_GO_BIN_DETECTED=false
+    else
+        if [ -z "$MY_GOBIN" ] ; then
+            echo "[$SYSTEM_PLATFORM] Detecting GOBIN ... NOT FOUND"
+            MY_PROJECT_GO_BIN_DETECTED=false
+        else
+            echo "[$SYSTEM_PLATFORM] Detecting GOBIN ... FOUND ( $MY_GOBIN )"
+            MY_PROJECT_GO_BIN=$MY_GOBIN
+            MY_PROJECT_GO_BIN_DETECTED=true
+        fi
+    fi
+fi
+
+
+
 ## Detect GOPATH
-echo "[$SYSTEM_PLATFORM] Detecting GOPATH ..."
-MY_GOPATH=$($GO_CLI env GOPATH)
-MY_CHECK_RESULT=$?
-if [ $MY_CHECK_RESULT -ne 0 ] ; then
-    echo "[$SYSTEM_PLATFORM] Detecting GOPATH ... FAILED"
+if [ "$MY_PROJECT_GO_BIN_DETECTED" = "false" ] ; then
+    echo "[$SYSTEM_PLATFORM] Detecting GOPATH ..."
+    MY_GOPATH=$($GO_CLI env GOPATH)
+    MY_CHECK_RESULT=$?
+    if [ $MY_CHECK_RESULT -ne 0 ] ; then
+        echo "[$SYSTEM_PLATFORM] Detecting GOPATH ... FAILED (ExitCode: $MY_CHECK_RESULT)"
+        MY_PROJECT_GO_BIN_DETECTED=false
+    else
+        if [ -z "$MY_GOPATH" ] ; then
+            echo "[$SYSTEM_PLATFORM] Detecting GOPATH ... NOT FOUND"
+            MY_PROJECT_GO_BIN_DETECTED=false
+        else
+            echo "[$SYSTEM_PLATFORM] Detecting GOPATH ... FOUND ( $MY_GOPATH )"
+            MY_PROJECT_GO_BIN="$MY_GOPATH/bin"
+            MY_PROJECT_GO_BIN_DETECTED=true
+        fi
+    fi
+fi
+if [ "$MY_PROJECT_GO_BIN_DETECTED" = "false" ] ; then
+    echo "[$SYSTEM_PLATFORM] Detecting GOBIN or GOPATH ... NOT FOUND"
     exit 1
 fi
-echo "[$SYSTEM_PLATFORM] Detecting GOPATH ... DONE"
 
 
 
-## Add GOPATH/bin into PATH
-echo "[$SYSTEM_PLATFORM] Adding GOPATH/bin into PATH ..."
-if [[ $PATH == *$MY_GOPATH/bin* ]]; then
-    echo "[$SYSTEM_PLATFORM] Adding GOPATH/bin into PATH ... SKIPPED"
+## Add GOBIN or GOPATH/bin into PATH
+echo "[$SYSTEM_PLATFORM] Adding GOBIN or GOPATH/bin into PATH ..."
+if [[ $PATH == *$MY_PROJECT_GO_BIN* ]]; then
+    echo "[$SYSTEM_PLATFORM] Adding GOBIN or GOPATH/bin into PATH ... SKIPPED"
 else
-    PATH=$MY_GOPATH/bin:$PATH
-    echo "[$SYSTEM_PLATFORM] Adding GOPATH/bin into PATH ... DONE"
+    PATH=$MY_PROJECT_GO_BIN:$PATH
+    echo "[$SYSTEM_PLATFORM] Adding GOBIN or GOPATH/bin into PATH ... DONE"
 fi
 
 
@@ -119,7 +157,7 @@ fi
 
 ## Build project
 echo "[$SYSTEM_PLATFORM] Building project ..."
-cd $PROJECT_DIR
+cd -- "$PROJECT_DIR" || exit 1
 
 ## Build project - Fetch project dependencies
 echo "[$SYSTEM_PLATFORM] Building project ... Fetching project dependencies ..."
