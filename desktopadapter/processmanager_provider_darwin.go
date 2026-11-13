@@ -9,7 +9,7 @@ import (
 
 func (pmp *ProcessManagerProvider) OnGetProcessIDListByName(processName string) ([]int, error) {
 	value := []int{}
-	processIdList, processIdListErr := darwinlibproc.GetRunningProcessIDList()
+	processIdList, processIdListErr := darwinlibproc.ListRunningProcessIDs()
 	if processIdListErr != nil {
 		return value, processIdListErr
 	}

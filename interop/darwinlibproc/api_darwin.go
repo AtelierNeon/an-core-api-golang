@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"errors"
+	"math"
 	"unsafe"
 
 	"github.com/AtelierNeon/an-core-api-golang/interop"
@@ -16,36 +17,38 @@ func GetProcessPathByProcessID(processID interop.ProcessID) (string, error) {
 		unsafe.Pointer(&buffer[0]),
 		uint32(len(buffer)),
 	)
-
 	kernelReturn := interop.KernelReturnType(errno)
 	if kernelReturn != interop.KernelReturnTypeSuccess {
 		return "", errors.New(kernelReturn.String())
 	}
 
-	if r1 <= 0 {
+	if r1 == 0 {
 		return "", errors.New("invalid process path size")
 	}
 
 	return interop.BufferToString(buffer), nil
 }
 
-func GetRunningProcessIDList() ([]interop.ProcessID, error) {
+func ListRunningProcessIDs() ([]interop.ProcessID, error) {
 	r1, _, errno := interop.ProcListpids(
 		interop.ProcessInfoTypeAllPIDs,
 		0,
 		nil,
 		0,
 	)
-	kernelReturnType := interop.KernelReturnType(errno)
-	if kernelReturnType != interop.KernelReturnTypeSuccess {
-		return nil, errors.New(kernelReturnType.String())
+	kernelReturn := interop.KernelReturnType(errno)
+	if kernelReturn != interop.KernelReturnTypeSuccess {
+		return nil, errors.New(kernelReturn.String())
 	}
 
 	if r1 == 0 {
-		return nil, errors.New("failed to get running process ID list")
+		return nil, errors.New("failed to list running process IDs")
 	}
 
 	bufferSize := uint32(r1)
+	if bufferSize < math.MaxUint32/2 {
+		bufferSize *= 2
+	}
 	buffer := make([]byte, bufferSize)
 	r1, _, errno = interop.ProcListpids(
 		interop.ProcessInfoTypeAllPIDs,
@@ -53,29 +56,30 @@ func GetRunningProcessIDList() ([]interop.ProcessID, error) {
 		unsafe.Pointer(&buffer[0]),
 		bufferSize,
 	)
-	kernelReturnType = interop.KernelReturnType(errno)
-	if kernelReturnType != interop.KernelReturnTypeSuccess {
-		return nil, errors.New(kernelReturnType.String())
+	kernelReturn = interop.KernelReturnType(errno)
+	if kernelReturn != interop.KernelReturnTypeSuccess {
+		return nil, errors.New(kernelReturn.String())
 	}
 
 	if r1 == 0 {
-		return nil, errors.New("failed to get running process ID list")
+		return nil, errors.New("failed to list running process IDs")
 	}
 
-	var pprocessID int32
-	processIDListSize := int(bufferSize) / binary.Size(pprocessID)
-	processIDList := make([]interop.ProcessID, 0, processIDListSize)
+	bufferSize = uint32(r1)
+	var processID interop.ProcessID
+	processIDListSize := int(bufferSize) / binary.Size(processID)
+	result := make([]interop.ProcessID, 0, processIDListSize)
 	binaryBuffer := bytes.NewBuffer(buffer)
 
 	for i := 0; i < processIDListSize; i++ {
-		if readErr := binary.Read(binaryBuffer, binary.NativeEndian, &pprocessID); readErr != nil {
+		if readErr := binary.Read(binaryBuffer, binary.NativeEndian, &processID); readErr != nil {
 			return nil, readErr
 		}
-		if pprocessID == 0 {
+		if processID == 0 {
 			continue
 		}
 
-		processIDList = append(processIDList, interop.ProcessID(pprocessID))
+		result = append(result, interop.ProcessID(processID))
 	}
-	return processIDList, nil
+	return result, nil
 }
