@@ -8,30 +8,30 @@ import (
 )
 
 func (pmp *ProcessManagerProvider) OnGetProcessIDListByName(processName string) ([]int, error) {
-	value := []int{}
-	processIdList, processIdListErr := darwinlibproc.ListRunningProcessIDs()
-	if processIdListErr != nil {
-		return value, processIdListErr
+	result := []int{}
+	processIDList, err := darwinlibproc.ListRunningProcessIDs()
+	if err != nil {
+		return result, err
 	}
 
-	for _, processId := range processIdList {
-		pid := int(processId)
-		processName2, processName2Err := pmp.OnGetProcessNameByID(pid)
-		if processName2Err != nil {
+	for _, processID := range processIDList {
+		pid := int(processID)
+		foundProcessName, err := pmp.OnGetProcessNameByID(pid)
+		if err != nil {
 			continue
 		}
-		if processName2 == processName {
-			value = append(value, pid)
+		if foundProcessName == processName {
+			result = append(result, pid)
 		}
 	}
 
-	return value, nil
+	return result, nil
 }
 
 func (pmp *ProcessManagerProvider) OnGetProcessNameByID(processID int) (string, error) {
-	processPath, processPathErr := pmp.OnGetProcessPathByID(processID)
-	if processPathErr != nil {
-		return "", processPathErr
+	processPath, err := pmp.OnGetProcessPathByID(processID)
+	if err != nil {
+		return "", err
 	}
 
 	index := strings.LastIndex(processPath, "/")

@@ -72,14 +72,14 @@ func ListRunningProcessIDs() ([]interop.ProcessID, error) {
 	binaryBuffer := bytes.NewBuffer(buffer)
 
 	for i := 0; i < processIDListSize; i++ {
-		if readErr := binary.Read(binaryBuffer, binary.NativeEndian, &processID); readErr != nil {
-			return nil, readErr
+		if err := binary.Read(binaryBuffer, binary.NativeEndian, &processID); err != nil {
+			return nil, err
 		}
 		if processID == 0 {
 			continue
 		}
 
-		result = append(result, interop.ProcessID(processID))
+		result = append(result, processID)
 	}
 	return result, nil
 }
