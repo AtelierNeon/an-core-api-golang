@@ -15,9 +15,13 @@ func GetProcessNameByID(processID int) (string, error) {
 	}
 
 	data := string(buffer)
-	nameBegin := strings.IndexRune(data, '(') + 1
-	nameEnd := strings.IndexRune(data[nameBegin:], ')')
-	return data[nameBegin : nameBegin+nameEnd], nil
+	start := strings.IndexByte(data, '(')
+	end := strings.LastIndexByte(data, ')')
+	if start < 0 || end <= start {
+		return "", fmt.Errorf("invalid process stat format: %s", path)
+	}
+
+	return data[start+1 : end], nil
 }
 
 func GetProcessPathByID(processID int) (string, error) {
