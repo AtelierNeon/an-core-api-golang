@@ -1,6 +1,6 @@
 package interop
 
-type MibTcpState uint32
+type MibTcpState WindowsEnum
 
 const (
 	MibTcpStateClosed    MibTcpState = /* MIB_TCP_STATE_CLOSED     */ 1

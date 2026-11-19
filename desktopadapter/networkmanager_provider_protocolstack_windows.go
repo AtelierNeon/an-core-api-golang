@@ -13,17 +13,17 @@ func (nmpps *NetworkManagerProviderProtocolStack) CheckPortBindingProcessID(port
 			localAddress := nmpps.localAddress
 
 			if localAddress == "" {
-				return portBinding.OwnerProcessID, nil
+				return int(portBinding.OwnerProcessID), nil
 			}
 
 			if localAddress == "localhost" {
 				if portBinding.LocalAddress == "127.0.0.1" || portBinding.LocalAddress == "::1" {
-					return portBinding.OwnerProcessID, nil
+					return int(portBinding.OwnerProcessID), nil
 				}
 			}
 
 			if portBinding.LocalAddress == localAddress {
-				return portBinding.OwnerProcessID, nil
+				return int(portBinding.OwnerProcessID), nil
 			}
 		}
 	}

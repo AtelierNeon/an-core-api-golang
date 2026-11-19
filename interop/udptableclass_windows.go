@@ -1,6 +1,6 @@
 package interop
 
-type UdpTableClass uint32
+type UdpTableClass WindowsEnum
 
 const (
 	UdpTableClassBasic       UdpTableClass = /* UDP_TABLE_BASIC        */ 0

@@ -10,12 +10,12 @@ import (
 	"golang.org/x/sys/windows"
 )
 
-func decodeIPv4Address(addr uint32) string {
+func decodeIPv4Address(addr interop.WindowsDWord) string {
 	return fmt.Sprintf("%d.%d.%d.%d", addr&255, addr>>8&255, addr>>16&255, addr>>24&255)
 }
 
-func decodeIPv6Address(addr [16]byte) string {
-	var buffer [16]byte
+func decodeIPv6Address(addr [16]interop.WindowsUChar) string {
+	var buffer [16]uint8
 	for i := 0; i < 16; i++ {
 		buffer[i] = uint8(addr[i])
 	}
@@ -24,7 +24,7 @@ func decodeIPv6Address(addr [16]byte) string {
 	return ip.String()
 }
 
-func decodePort(port uint32) uint16 {
+func decodePort(port interop.WindowsDWord) uint16 {
 	return syscall.Ntohs(uint16(port))
 }
 
@@ -59,13 +59,13 @@ func GetPortBindingList() ([]PortBindingInfo, error) {
 }
 
 func getPortBindingListForTCP4() ([]PortBindingInfo, error) {
-	var table *interop.MibTcpTableOwnerPid
-	tableBufferSize := uint32(0)
+	var table *interop.MIB_TCPTABLE_OWNER_PID
+	tableBufferSize := interop.WindowsDWord(0)
 
 	err := interop.GetExtendedTcpTable(
 		uintptr(unsafe.Pointer(table)),
 		&tableBufferSize,
-		true,
+		interop.TRUE,
 		syscall.AF_INET,
 		interop.TcpTableClassOwnerPidAll,
 		0,
@@ -75,11 +75,11 @@ func getPortBindingListForTCP4() ([]PortBindingInfo, error) {
 	}
 
 	tableBuffer := make([]byte, tableBufferSize)
-	table = (*interop.MibTcpTableOwnerPid)(unsafe.Pointer(&tableBuffer[0]))
+	table = (*interop.MIB_TCPTABLE_OWNER_PID)(unsafe.Pointer(&tableBuffer[0]))
 	err = interop.GetExtendedTcpTable(
 		uintptr(unsafe.Pointer(table)),
 		&tableBufferSize,
-		true,
+		interop.TRUE,
 		syscall.AF_INET,
 		interop.TcpTableClassOwnerPidAll,
 		0,
@@ -97,15 +97,15 @@ func getPortBindingListForTCP4() ([]PortBindingInfo, error) {
 	tableRowIndex := int(unsafe.Sizeof(table.DwNumEntries))
 	tableRowStep := int(unsafe.Sizeof(table.Table))
 	for i := 0; i < int(table.DwNumEntries); i++ {
-		tableRow := (*interop.MibTcpRowOwnerPid)(unsafe.Pointer(&tableBuffer[tableRowIndex]))
+		tableRow := (*interop.MIB_TCPROW_OWNER_PID)(unsafe.Pointer(&tableBuffer[tableRowIndex]))
 		item := PortBindingInfo{
 			LocalAddress:   decodeIPv4Address(tableRow.DwLocalAddr),
 			LocalPort:      decodePort(tableRow.DwLocalPort),
 			RemoteAddress:  decodeIPv4Address(tableRow.DwRemoteAddr),
 			RemotePort:     decodePort(tableRow.DwRemotePort),
-			OwnerProcessID: int(tableRow.DwOwningPid),
-			State:          interop.MibTcpState(tableRow.DwState).String(),
-			Kind:           "tcp4",
+			OwnerProcessID: tableRow.DwOwningPid,
+			State:          interop.MibTcpState(tableRow.DwState),
+			Kind:           interop.PortBindingKindTCP4,
 		}
 		result = append(result, item)
 		tableRowIndex += tableRowStep
@@ -114,13 +114,13 @@ func getPortBindingListForTCP4() ([]PortBindingInfo, error) {
 }
 
 func getPortBindingListForTCP6() ([]PortBindingInfo, error) {
-	var table *interop.MibTcp6TableOwnerPid
-	tableBufferSize := uint32(0)
+	var table *interop.MIB_TCP6TABLE_OWNER_PID
+	tableBufferSize := interop.WindowsDWord(0)
 
 	err := interop.GetExtendedTcpTable(
 		uintptr(unsafe.Pointer(table)),
 		&tableBufferSize,
-		true,
+		interop.TRUE,
 		syscall.AF_INET6,
 		interop.TcpTableClassOwnerPidAll,
 		0,
@@ -130,11 +130,11 @@ func getPortBindingListForTCP6() ([]PortBindingInfo, error) {
 	}
 
 	tableBuffer := make([]byte, tableBufferSize)
-	table = (*interop.MibTcp6TableOwnerPid)(unsafe.Pointer(&tableBuffer[0]))
+	table = (*interop.MIB_TCP6TABLE_OWNER_PID)(unsafe.Pointer(&tableBuffer[0]))
 	err = interop.GetExtendedTcpTable(
 		uintptr(unsafe.Pointer(table)),
 		&tableBufferSize,
-		true,
+		interop.TRUE,
 		syscall.AF_INET6,
 		interop.TcpTableClassOwnerPidAll,
 		0,
@@ -152,15 +152,15 @@ func getPortBindingListForTCP6() ([]PortBindingInfo, error) {
 	tableRowIndex := int(unsafe.Sizeof(table.DwNumEntries))
 	tableRowStep := int(unsafe.Sizeof(table.Table))
 	for i := 0; i < int(table.DwNumEntries); i++ {
-		tableRow := (*interop.MibTcp6RowOwnerPid)(unsafe.Pointer(&tableBuffer[tableRowIndex]))
+		tableRow := (*interop.MIB_TCP6ROW_OWNER_PID)(unsafe.Pointer(&tableBuffer[tableRowIndex]))
 		item := PortBindingInfo{
 			LocalAddress:   decodeIPv6Address(tableRow.UcLocalAddr),
 			LocalPort:      decodePort(tableRow.DwLocalPort),
 			RemoteAddress:  decodeIPv6Address(tableRow.UcRemoteAddr),
 			RemotePort:     decodePort(tableRow.DwRemotePort),
-			OwnerProcessID: int(tableRow.DwOwningPid),
-			State:          interop.MibTcpState(tableRow.DwState).String(),
-			Kind:           "tcp6",
+			OwnerProcessID: tableRow.DwOwningPid,
+			State:          interop.MibTcpState(tableRow.DwState),
+			Kind:           interop.PortBindingKindTCP6,
 		}
 		result = append(result, item)
 		tableRowIndex += tableRowStep
@@ -169,13 +169,13 @@ func getPortBindingListForTCP6() ([]PortBindingInfo, error) {
 }
 
 func getPortBindingListForUDP4() ([]PortBindingInfo, error) {
-	var table *interop.MibUdpTableOwnerPid
-	tableBufferSize := uint32(0)
+	var table *interop.MIB_UDPTABLE_OWNER_PID
+	tableBufferSize := interop.WindowsDWord(0)
 
 	err := interop.GetExtendedUdpTable(
 		uintptr(unsafe.Pointer(table)),
 		&tableBufferSize,
-		true,
+		interop.TRUE,
 		syscall.AF_INET,
 		interop.UdpTableClassOwnerPid,
 		0,
@@ -185,11 +185,11 @@ func getPortBindingListForUDP4() ([]PortBindingInfo, error) {
 	}
 
 	tableBuffer := make([]byte, tableBufferSize)
-	table = (*interop.MibUdpTableOwnerPid)(unsafe.Pointer(&tableBuffer[0]))
+	table = (*interop.MIB_UDPTABLE_OWNER_PID)(unsafe.Pointer(&tableBuffer[0]))
 	err = interop.GetExtendedUdpTable(
 		uintptr(unsafe.Pointer(table)),
 		&tableBufferSize,
-		true,
+		interop.TRUE,
 		syscall.AF_INET,
 		interop.UdpTableClassOwnerPid,
 		0,
@@ -207,13 +207,13 @@ func getPortBindingListForUDP4() ([]PortBindingInfo, error) {
 	tableRowIndex := int(unsafe.Sizeof(table.DwNumEntries))
 	tableRowStep := int(unsafe.Sizeof(table.Table))
 	for i := 0; i < int(table.DwNumEntries); i++ {
-		tableRow := (*interop.MibUdpRowOwnerPid)(unsafe.Pointer(&tableBuffer[tableRowIndex]))
+		tableRow := (*interop.MIB_UDPROW_OWNER_PID)(unsafe.Pointer(&tableBuffer[tableRowIndex]))
 		item := PortBindingInfo{
 			LocalAddress:   decodeIPv4Address(tableRow.DwLocalAddr),
 			LocalPort:      decodePort(tableRow.DwLocalPort),
-			OwnerProcessID: int(tableRow.DwOwningPid),
-			State:          interop.MibTcpStateListen.String(),
-			Kind:           "udp4",
+			OwnerProcessID: tableRow.DwOwningPid,
+			State:          interop.MibTcpStateListen,
+			Kind:           interop.PortBindingKindUDP4,
 		}
 		result = append(result, item)
 		tableRowIndex += tableRowStep
@@ -222,13 +222,13 @@ func getPortBindingListForUDP4() ([]PortBindingInfo, error) {
 }
 
 func getPortBindingListForUDP6() ([]PortBindingInfo, error) {
-	var table *interop.MibUdp6TableOwnerPid
-	tableBufferSize := uint32(0)
+	var table *interop.MIB_UDP6TABLE_OWNER_PID
+	tableBufferSize := interop.WindowsDWord(0)
 
 	err := interop.GetExtendedUdpTable(
 		uintptr(unsafe.Pointer(table)),
 		&tableBufferSize,
-		true,
+		interop.TRUE,
 		syscall.AF_INET6,
 		interop.UdpTableClassOwnerPid,
 		0,
@@ -238,11 +238,11 @@ func getPortBindingListForUDP6() ([]PortBindingInfo, error) {
 	}
 
 	tableBuffer := make([]byte, tableBufferSize)
-	table = (*interop.MibUdp6TableOwnerPid)(unsafe.Pointer(&tableBuffer[0]))
+	table = (*interop.MIB_UDP6TABLE_OWNER_PID)(unsafe.Pointer(&tableBuffer[0]))
 	err = interop.GetExtendedUdpTable(
 		uintptr(unsafe.Pointer(table)),
 		&tableBufferSize,
-		true,
+		interop.TRUE,
 		syscall.AF_INET6,
 		interop.UdpTableClassOwnerPid,
 		0,
@@ -260,13 +260,13 @@ func getPortBindingListForUDP6() ([]PortBindingInfo, error) {
 	tableRowIndex := int(unsafe.Sizeof(table.DwNumEntries))
 	tableRowStep := int(unsafe.Sizeof(table.Table))
 	for i := 0; i < int(table.DwNumEntries); i++ {
-		tableRow := (*interop.MibUdp6RowOwnerPid)(unsafe.Pointer(&tableBuffer[tableRowIndex]))
+		tableRow := (*interop.MIB_UDP6ROW_OWNER_PID)(unsafe.Pointer(&tableBuffer[tableRowIndex]))
 		item := PortBindingInfo{
 			LocalAddress:   decodeIPv6Address(tableRow.UcLocalAddr),
 			LocalPort:      decodePort(tableRow.DwLocalPort),
-			OwnerProcessID: int(tableRow.DwOwningPid),
-			State:          interop.MibTcpStateListen.String(),
-			Kind:           "udp6",
+			OwnerProcessID: tableRow.DwOwningPid,
+			State:          interop.MibTcpStateListen,
+			Kind:           interop.PortBindingKindUDP6,
 		}
 		result = append(result, item)
 		tableRowIndex += tableRowStep

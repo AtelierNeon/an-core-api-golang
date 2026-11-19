@@ -1,6 +1,6 @@
 package interop
 
-type TcpTableClass uint32
+type TcpTableClass WindowsEnum
 
 const (
 	TcpTableClassBasicListener          TcpTableClass = /* TCP_TABLE_BASIC_LISTENER           */ 0
