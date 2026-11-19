@@ -17,8 +17,9 @@ const (
 
 func decodeIPv4Address(data *byte) string {
 	in4In6Addr := (*interop.In4In6_addr)(unsafe.Pointer(data))
-	ip := net.IP(in4In6Addr.Addr4[:])
-	return ip.String()
+	ip := make([]byte, 4)
+	binary.BigEndian.PutUint32(ip, uint32(in4In6Addr.Addr4.Addr))
+	return net.IP(ip).String()
 }
 
 func decodeIPv6Address(data *byte) string {

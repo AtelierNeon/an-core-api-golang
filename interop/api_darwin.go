@@ -8,6 +8,8 @@ import (
 
 type DarwinGidT uint32
 
+type DarwinInAddrT uint32
+
 type DarwinInt int32
 
 type DarwinOffT int64
@@ -29,7 +31,12 @@ const (
 /* https://github.com/apple-oss-distributions/xnu/blob/main/bsd/sys/proc_info.h */
 type In4In6_addr struct /* struct in4in6_addr */ {
 	Pad   [3]uint32
-	Addr4 [4]byte
+	Addr4 In_addr
+}
+
+/* https://github.com/apple-oss-distributions/xnu/blob/main/bsd/netinet/in.h */
+type In_addr struct /* struct in_addr */ {
+	Addr DarwinInAddrT
 }
 
 /* https://github.com/apple-oss-distributions/xnu/blob/main/bsd/sys/proc_info.h */
