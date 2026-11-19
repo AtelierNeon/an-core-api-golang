@@ -23,9 +23,10 @@ func decodeIPv4Address(data *byte) string {
 }
 
 func decodeIPv6Address(data *byte) string {
-	in6Addr := *(*[]byte)(unsafe.Pointer(data))
-	ip := net.IP(in6Addr)
-	return ip.String()
+	in6Addr := (*interop.In6_addr)(unsafe.Pointer(data))
+	ip := make([]byte, 16)
+	copy(ip, in6Addr.Addr[:])
+	return net.IP(ip).String()
 }
 
 func decodeInSocketInfo(data *byte) *interop.In_sockinfo {
@@ -161,7 +162,7 @@ func getProcessFDMapByProcessID(processID interop.ProcessID) (map[string]interop
 	}
 
 	if r1 == 0 {
-		return nil, errors.New("failed to get process fd map")
+		return nil, errors.New("failed to get process info size")
 	}
 
 	bufferSize = interop.DarwinInt(r1)
@@ -216,7 +217,7 @@ func getSocketFDInfo(processId interop.ProcessID, processFDInfo interop.Proc_fdi
 	}
 
 	if r1 == 0 {
-		return nil, errors.New("invalid socketFdInfo")
+		return nil, errors.New("invalid process fd info")
 	}
 
 	result := (*interop.Socket_fdinfo)(unsafe.Pointer(&buffer[0]))

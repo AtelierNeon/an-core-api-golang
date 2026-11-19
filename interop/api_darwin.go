@@ -35,6 +35,11 @@ type In4In6_addr struct /* struct in4in6_addr */ {
 }
 
 /* https://github.com/apple-oss-distributions/xnu/blob/main/bsd/netinet/in.h */
+type In6_addr struct /* struct in6_addr */ {
+	Addr [16]byte
+}
+
+/* https://github.com/apple-oss-distributions/xnu/blob/main/bsd/netinet/in.h */
 type In_addr struct /* struct in_addr */ {
 	Addr DarwinInAddrT
 }
