@@ -1,0 +1,31 @@
+package desktopadapter
+
+import "github.com/AtelierNeon/an-core-api-golang/interop/darwinlibproc"
+
+func (nmpps *NetworkManagerProviderProtocolStack) CheckPortBindingProcessID(port uint16) (int, error) {
+	portBindingList, err := darwinlibproc.GetPortBindingList()
+	if err != nil {
+		return -1, err
+	}
+
+	for _, portBinding := range portBindingList {
+		if portBinding.LocalPort == port {
+			localAddress := nmpps.localAddress
+
+			if localAddress == "" {
+				return int(portBinding.OwnerProcessID), nil
+			}
+
+			if localAddress == "localhost" {
+				if portBinding.LocalAddress == "127.0.0.1" || portBinding.LocalAddress == "::1" {
+					return int(portBinding.OwnerProcessID), nil
+				}
+			}
+
+			if portBinding.LocalAddress == localAddress {
+				return int(portBinding.OwnerProcessID), nil
+			}
+		}
+	}
+	return -1, nil
+}

@@ -2,11 +2,6 @@ package interop
 
 import (
 	"syscall"
-	"unsafe"
-)
-
-const (
-	procPidPathInfoSize = 0x400
 )
 
 // We should also define the relative entry in assembly (*.s)
@@ -16,46 +11,18 @@ var libc_proc_listpids_trampoline_addr uintptr
 
 // We should also define the relative entry in assembly (*.s)
 //
+//go:cgo_import_dynamic libc_proc_pidfdinfo proc_pidfdinfo "/usr/lib/libSystem.B.dylib"
+var libc_proc_pidfdinfo_trampoline_addr uintptr
+
+// We should also define the relative entry in assembly (*.s)
+//
+//go:cgo_import_dynamic libc_proc_pidinfo proc_pidinfo "/usr/lib/libSystem.B.dylib"
+var libc_proc_pidinfo_trampoline_addr uintptr
+
+// We should also define the relative entry in assembly (*.s)
+//
 //go:cgo_import_dynamic libc_proc_pidpath proc_pidpath "/usr/lib/libSystem.B.dylib"
 var libc_proc_pidpath_trampoline_addr uintptr
-
-func BufferToString(buffer []byte) string {
-	return runtime_gostring(&buffer[0])
-}
-
-func NewProcPidpathBuffer() []byte {
-	return make([]byte, procPidPathInfoSize)
-}
-
-//go:nosplit
-func ProcListpids(
-	processInfoType ProcessInfoType,
-	processInfo uint32,
-	buffer unsafe.Pointer,
-	bufferSize uint32) (r1, r2 uintptr, err syscall.Errno) {
-	return syscall_syscall6(
-		libc_proc_listpids_trampoline_addr,
-		uintptr(processInfoType),
-		uintptr(processInfo),
-		uintptr(buffer),
-		uintptr(bufferSize),
-		0,
-		0,
-	)
-}
-
-//go:nosplit
-func ProcPidpath(
-	processID ProcessID,
-	buffer unsafe.Pointer,
-	bufferSize uint32) (r1, r2 uintptr, err syscall.Errno) {
-	return syscall_syscall(
-		libc_proc_pidpath_trampoline_addr,
-		uintptr(processID),
-		uintptr(buffer),
-		uintptr(bufferSize),
-	)
-}
 
 // From sdk/go/src/runtime/string.go
 //
