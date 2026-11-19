@@ -44,30 +44,30 @@ func GetPortBindingList() ([]PortBindingInfo, error) {
 	}
 
 	for _, processID := range processIDList {
-		processFdMap, err := getProcessFdMapByProcessID(processID)
+		processFDMap, err := getProcessFDMapByProcessID(processID)
 		if err != nil {
 			continue
 		}
 
-		for _, processFdInfo := range processFdMap {
-			processFdType := processFdInfo.ProcFdType
-			if processFdType != interop.ProcessFdTypeSocket {
+		for _, processFDInfo := range processFDMap {
+			processFDType := processFDInfo.ProcFdType
+			if processFDType != interop.ProcessFDTypeSocket {
 				continue
 			}
 
-			socketFdInfo, err := getSocketFdInfo(
+			socketFDInfo, err := getSocketFDInfo(
 				processID,
-				processFdInfo,
+				processFDInfo,
 			)
 			if err != nil {
 				continue
 			}
 
-			family := socketFdInfo.Socket.Family
-			kind := socketFdInfo.Socket.Kind
+			family := socketFDInfo.Socket.Family
+			kind := socketFDInfo.Socket.Kind
 			if family == interop.AddressFamilyInet {
 				if kind == interop.SocketKindTcp {
-					tcpSocketInfo := decodeTcpSocketInfo(&socketFdInfo.Socket.Proto[0])
+					tcpSocketInfo := decodeTcpSocketInfo(&socketFDInfo.Socket.Proto[0])
 					inSockInfo := tcpSocketInfo.Ini
 					item := PortBindingInfo{
 						LocalAddress:   decodeIPv4Address(&inSockInfo.Laddr[0]),
@@ -75,26 +75,26 @@ func GetPortBindingList() ([]PortBindingInfo, error) {
 						RemoteAddress:  decodeIPv4Address(&inSockInfo.Faddr[0]),
 						RemotePort:     netToNativeEndianInShort(uint16(inSockInfo.Fport)),
 						OwnerProcessID: processID,
-						State:          tcpSocketInfo.State.String(),
-						Kind:           "tcp4",
+						State:          tcpSocketInfo.State,
+						Kind:           interop.PortBindingKindTCP4,
 					}
 					result = append(result, item)
 				} else if kind == interop.SocketKindIn {
-					inSockInfo := decodeInSocketInfo(&socketFdInfo.Socket.Proto[0])
+					inSockInfo := decodeInSocketInfo(&socketFDInfo.Socket.Proto[0])
 					item := PortBindingInfo{
 						LocalAddress:   decodeIPv4Address(&inSockInfo.Laddr[0]),
 						LocalPort:      netToNativeEndianInShort(uint16(inSockInfo.Lport)),
 						RemoteAddress:  decodeIPv4Address(&inSockInfo.Faddr[0]),
 						RemotePort:     netToNativeEndianInShort(uint16(inSockInfo.Fport)),
 						OwnerProcessID: processID,
-						State:          interop.TcpStateListen.String(),
-						Kind:           "udp4",
+						State:          interop.TcpStateListen,
+						Kind:           interop.PortBindingKindUDP4,
 					}
 					result = append(result, item)
 				}
 			} else if family == interop.AddressFamilyInet6 {
 				if kind == interop.SocketKindTcp {
-					tcpSocketInfo := decodeTcpSocketInfo(&socketFdInfo.Socket.Proto[0])
+					tcpSocketInfo := decodeTcpSocketInfo(&socketFDInfo.Socket.Proto[0])
 					inSockInfo := tcpSocketInfo.Ini
 					item := PortBindingInfo{
 						LocalAddress:   decodeIPv6Address(&inSockInfo.Laddr[0]),
@@ -102,20 +102,20 @@ func GetPortBindingList() ([]PortBindingInfo, error) {
 						RemoteAddress:  decodeIPv6Address(&inSockInfo.Faddr[0]),
 						RemotePort:     netToNativeEndianInShort(uint16(inSockInfo.Fport)),
 						OwnerProcessID: processID,
-						State:          tcpSocketInfo.State.String(),
-						Kind:           "tcp6",
+						State:          tcpSocketInfo.State,
+						Kind:           interop.PortBindingKindTCP6,
 					}
 					result = append(result, item)
 				} else if kind == interop.SocketKindIn {
-					inSockInfo := decodeInSocketInfo(&socketFdInfo.Socket.Proto[0])
+					inSockInfo := decodeInSocketInfo(&socketFDInfo.Socket.Proto[0])
 					item := PortBindingInfo{
 						LocalAddress:   decodeIPv6Address(&inSockInfo.Laddr[0]),
 						LocalPort:      netToNativeEndianInShort(uint16(inSockInfo.Lport)),
 						RemoteAddress:  decodeIPv6Address(&inSockInfo.Faddr[0]),
 						RemotePort:     netToNativeEndianInShort(uint16(inSockInfo.Fport)),
 						OwnerProcessID: processID,
-						State:          interop.TcpStateListen.String(),
-						Kind:           "udp6",
+						State:          interop.TcpStateListen,
+						Kind:           interop.PortBindingKindUDP6,
 					}
 					result = append(result, item)
 				}
@@ -125,7 +125,7 @@ func GetPortBindingList() ([]PortBindingInfo, error) {
 	return result, nil
 }
 
-func getProcessFdMapByProcessID(processID interop.ProcessID) (map[string]interop.Proc_fdinfo, error) {
+func getProcessFDMapByProcessID(processID interop.ProcessID) (map[string]interop.Proc_fdinfo, error) {
 	r1, _, errno := interop.Proc_pidinfo(
 		processID,
 		interop.ProcessIDFlavorListFDs,
@@ -164,42 +164,19 @@ func getProcessFdMapByProcessID(processID interop.ProcessID) (map[string]interop
 	}
 
 	bufferSize = interop.DarwinInt(r1)
-	var processFdInfo interop.Proc_fdinfo
-	processFdInfoListSize := int(bufferSize) / binary.Size(processFdInfo)
+	var processFDInfo interop.Proc_fdinfo
+	processFDInfoListSize := int(bufferSize) / binary.Size(processFDInfo)
 	result := make(map[string]interop.Proc_fdinfo)
 	binaryBuffer := bytes.NewBuffer(buffer)
 
-	for i := 0; i < processFdInfoListSize; i++ {
-		if err := binary.Read(binaryBuffer, binary.NativeEndian, &processFdInfo); err != nil {
+	for i := 0; i < processFDInfoListSize; i++ {
+		if err := binary.Read(binaryBuffer, binary.NativeEndian, &processFDInfo); err != nil {
 			return nil, err
 		}
 
-		key := fmt.Sprintf("%d_%d", processFdInfo.ProcFd, processFdInfo.ProcFdType)
-		result[key] = processFdInfo
+		key := fmt.Sprintf("%d_%d", processFDInfo.ProcFd, processFDInfo.ProcFdType)
+		result[key] = processFDInfo
 	}
-	return result, nil
-}
-
-func getSocketFdInfo(processId interop.ProcessID, processFdInfo interop.Proc_fdinfo) (*interop.Socket_fdinfo, error) {
-	bufferSize := interop.DarwinInt(unsafe.Sizeof(interop.Socket_fdinfo{}))
-	buffer := make([]byte, bufferSize)
-	r1, _, errno := interop.Proc_pidfdinfo(
-		processId,
-		interop.DarwinInt(processFdInfo.ProcFd),
-		interop.ProcessFDFlavorSocket,
-		unsafe.Pointer(&buffer[0]),
-		bufferSize,
-	)
-	kernelReturn := interop.KernelReturn(errno)
-	if kernelReturn != interop.KernelReturnSuccess {
-		return nil, errors.New(kernelReturn.String())
-	}
-
-	if r1 == 0 {
-		return nil, errors.New("invalid socketFdInfo")
-	}
-
-	result := (*interop.Socket_fdinfo)(unsafe.Pointer(&buffer[0]))
 	return result, nil
 }
 
@@ -220,6 +197,29 @@ func GetProcessPathByProcessID(processID interop.ProcessID) (string, error) {
 	}
 
 	return interop.BufferToString(buffer), nil
+}
+
+func getSocketFDInfo(processId interop.ProcessID, processFDInfo interop.Proc_fdinfo) (*interop.Socket_fdinfo, error) {
+	bufferSize := interop.DarwinInt(unsafe.Sizeof(interop.Socket_fdinfo{}))
+	buffer := make([]byte, bufferSize)
+	r1, _, errno := interop.Proc_pidfdinfo(
+		processId,
+		interop.DarwinInt(processFDInfo.ProcFd),
+		interop.ProcessFDFlavorSocket,
+		unsafe.Pointer(&buffer[0]),
+		bufferSize,
+	)
+	kernelReturn := interop.KernelReturn(errno)
+	if kernelReturn != interop.KernelReturnSuccess {
+		return nil, errors.New(kernelReturn.String())
+	}
+
+	if r1 == 0 {
+		return nil, errors.New("invalid socketFdInfo")
+	}
+
+	result := (*interop.Socket_fdinfo)(unsafe.Pointer(&buffer[0]))
+	return result, nil
 }
 
 func ListRunningProcessIDs() ([]interop.ProcessID, error) {

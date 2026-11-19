@@ -51,7 +51,7 @@ type In_sockinfo struct /* struct in_sockinfo */ {
 /* https://github.com/apple-oss-distributions/xnu/blob/main/bsd/sys/proc_info.h */
 type Proc_fdinfo struct /* struct proc_fdinfo */ {
 	ProcFd     int32
-	ProcFdType ProcessFdType
+	ProcFdType ProcessFDType
 }
 
 /* https://github.com/apple-oss-distributions/xnu/blob/main/bsd/sys/proc_info.h */

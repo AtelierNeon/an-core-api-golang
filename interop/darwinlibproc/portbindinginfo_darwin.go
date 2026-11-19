@@ -8,6 +8,6 @@ type PortBindingInfo struct {
 	RemoteAddress  string
 	RemotePort     uint16
 	OwnerProcessID interop.ProcessID
-	State          string
-	Kind           string
+	State          interop.TcpState
+	Kind           interop.PortBindingKind
 }
