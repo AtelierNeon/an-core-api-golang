@@ -201,7 +201,7 @@ func Proc_pidinfo(
 	processIDFlavor ProcessIDFlavor,
 	arg uint64,
 	buffer unsafe.Pointer,
-	buffersize uint32) (r1, r2 uintptr, err syscall.Errno) {
+	buffersize DarwinInt) (r1, r2 uintptr, err syscall.Errno) {
 	return syscall_syscall6(
 		libc_proc_pidinfo_trampoline_addr,
 		uintptr(processID),
@@ -218,7 +218,7 @@ func Proc_pidinfo(
 func Proc_pidpath(
 	processID ProcessID,
 	buffer unsafe.Pointer,
-	bufferSize uint32) (r1, r2 uintptr, err syscall.Errno) {
+	bufferSize DarwinInt) (r1, r2 uintptr, err syscall.Errno) {
 	return syscall_syscall(
 		libc_proc_pidpath_trampoline_addr,
 		uintptr(processID),

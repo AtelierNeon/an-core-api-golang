@@ -5,7 +5,6 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
-	"math"
 	"net"
 	"unsafe"
 
@@ -143,8 +142,8 @@ func getProcessFdMapByProcessID(processID interop.ProcessID) (map[string]interop
 		return nil, errors.New("failed to get process info size")
 	}
 
-	bufferSize := uint32(r1)
-	if bufferSize < math.MaxUint32/2 {
+	bufferSize := interop.DarwinInt(r1)
+	if bufferSize < interop.MaxDarwinInt/2 {
 		bufferSize *= 2
 	}
 	buffer := make([]byte, bufferSize)
@@ -164,7 +163,7 @@ func getProcessFdMapByProcessID(processID interop.ProcessID) (map[string]interop
 		return nil, errors.New("failed to get process fd map")
 	}
 
-	bufferSize = uint32(r1)
+	bufferSize = interop.DarwinInt(r1)
 	var processFdInfo interop.Proc_fdinfo
 	processFdInfoListSize := int(bufferSize) / binary.Size(processFdInfo)
 	result := make(map[string]interop.Proc_fdinfo)
@@ -209,7 +208,7 @@ func GetProcessPathByProcessID(processID interop.ProcessID) (string, error) {
 	r1, _, errno := interop.Proc_pidpath(
 		processID,
 		unsafe.Pointer(&buffer[0]),
-		uint32(len(buffer)),
+		interop.DarwinInt(len(buffer)),
 	)
 	kernelReturn := interop.KernelReturn(errno)
 	if kernelReturn != interop.KernelReturnSuccess {
