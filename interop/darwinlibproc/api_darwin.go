@@ -182,11 +182,11 @@ func getProcessFdMapByProcessID(processID interop.ProcessID) (map[string]interop
 }
 
 func getSocketFdInfo(processId interop.ProcessID, processFdInfo interop.Proc_fdinfo) (*interop.Socket_fdinfo, error) {
-	bufferSize := uint32(unsafe.Sizeof(interop.Socket_fdinfo{}))
+	bufferSize := interop.DarwinInt(unsafe.Sizeof(interop.Socket_fdinfo{}))
 	buffer := make([]byte, bufferSize)
 	r1, _, errno := interop.Proc_pidfdinfo(
 		processId,
-		processFdInfo.ProcFd,
+		interop.DarwinInt(processFdInfo.ProcFd),
 		interop.ProcessFDFlavorSocket,
 		unsafe.Pointer(&buffer[0]),
 		bufferSize,

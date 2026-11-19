@@ -179,14 +179,14 @@ func Proc_listpids(
 //go:nosplit
 func Proc_pidfdinfo(
 	processID ProcessID,
-	processFd int32,
+	processFD DarwinInt,
 	processFDFlavor ProcessFDFlavor,
 	buffer unsafe.Pointer,
-	buffersize uint32) (r1, r2 uintptr, err syscall.Errno) {
+	buffersize DarwinInt) (r1, r2 uintptr, err syscall.Errno) {
 	return syscall_syscall6(
 		libc_proc_pidfdinfo_trampoline_addr,
 		uintptr(processID),
-		uintptr(processFd),
+		uintptr(processFD),
 		uintptr(processFDFlavor),
 		uintptr(buffer),
 		uintptr(buffersize),
