@@ -69,8 +69,8 @@ func decodeIPv6AddressAndPort(rawAddressPort string) (string, uint16, error) {
 }
 
 func decodeTcpState(rawState string) (uint32, error) {
-	state, stateErr := strconv.ParseUint(rawState, 16, 16)
-	if stateErr != nil {
+	state, err := strconv.ParseUint(rawState, 16, 16)
+	if err != nil {
 		return 0, fmt.Errorf("invalid state: %s", rawState)
 	}
 
@@ -125,7 +125,7 @@ func GetPortBindingList() ([]PortBindingInfo, error) {
 		inode := item.Inode
 		processID, exists := inodeMap[inode]
 		if exists {
-			result[i].OwnerProcessID = processID
+			result[i].OwnerProcessID = interop.ProcessID(processID)
 		}
 	}
 
@@ -185,8 +185,8 @@ func getPortBindingListForTCP4() ([]PortBindingInfo, error) {
 			LocalPort:     localPort,
 			RemoteAddress: remoteAddress,
 			RemotePort:    remotePort,
-			State:         interop.ProcfsTcpState(tcpState).String(),
-			Kind:          "tcp4",
+			State:         interop.TcpState(tcpState),
+			Kind:          interop.PortBindingKindTCP4,
 			Inode:         field[9],
 		}
 		result = append(result, item)
@@ -239,8 +239,8 @@ func getPortBindingListForTCP6() ([]PortBindingInfo, error) {
 			LocalPort:     localPort,
 			RemoteAddress: remoteAddress,
 			RemotePort:    remotePort,
-			State:         interop.ProcfsTcpState(tcpState).String(),
-			Kind:          "tcp6",
+			State:         interop.TcpState(tcpState),
+			Kind:          interop.PortBindingKindTCP6,
 			Inode:         field[9],
 		}
 		result = append(result, item)
@@ -289,8 +289,8 @@ func getPortBindingListForUDP4() ([]PortBindingInfo, error) {
 			LocalPort:     localPort,
 			RemoteAddress: remoteAddress,
 			RemotePort:    remotePort,
-			State:         "",
-			Kind:          "udp4",
+			State:         interop.TcpStateListen,
+			Kind:          interop.PortBindingKindUDP4,
 			Inode:         field[9],
 		}
 		result = append(result, item)
@@ -337,8 +337,8 @@ func getPortBindingListForUDP6() ([]PortBindingInfo, error) {
 			LocalPort:     localPort,
 			RemoteAddress: remoteAddress,
 			RemotePort:    remotePort,
-			State:         "",
-			Kind:          "udp6",
+			State:         interop.TcpStateListen,
+			Kind:          interop.PortBindingKindUDP6,
 			Inode:         field[9],
 		}
 		result = append(result, item)

@@ -1,12 +1,14 @@
 package linuxprocfs
 
+import "github.com/AtelierNeon/an-core-api-golang/interop"
+
 type PortBindingInfo struct {
 	LocalAddress   string
 	LocalPort      uint16
 	RemoteAddress  string
 	RemotePort     uint16
-	OwnerProcessID int
-	State          string
-	Kind           string
+	OwnerProcessID interop.ProcessID
+	State          interop.TcpState
+	Kind           interop.PortBindingKind
 	Inode          string
 }
