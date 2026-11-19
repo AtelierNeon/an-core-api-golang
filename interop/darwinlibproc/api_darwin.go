@@ -239,8 +239,8 @@ func ListRunningProcessIDs() ([]interop.ProcessID, error) {
 		return nil, errors.New("failed to list running process IDs")
 	}
 
-	bufferSize := uint32(r1)
-	if bufferSize < math.MaxUint32/2 {
+	bufferSize := interop.DarwinInt(r1)
+	if bufferSize < interop.MaxDarwinInt/2 {
 		bufferSize *= 2
 	}
 	buffer := make([]byte, bufferSize)
@@ -259,7 +259,7 @@ func ListRunningProcessIDs() ([]interop.ProcessID, error) {
 		return nil, errors.New("failed to list running process IDs")
 	}
 
-	bufferSize = uint32(r1)
+	bufferSize = interop.DarwinInt(r1)
 	var processID interop.ProcessID
 	processIDListSize := int(bufferSize) / binary.Size(processID)
 	result := make([]interop.ProcessID, 0, processIDListSize)

@@ -1,6 +1,7 @@
 package interop
 
 import (
+	"math"
 	"syscall"
 	"unsafe"
 )
@@ -20,6 +21,10 @@ type DarwinUidT uint32
 type DarwinUShort uint16
 
 type ProcessID DarwinInt
+
+const (
+	MaxDarwinInt = math.MaxInt32
+)
 
 /* https://github.com/apple-oss-distributions/xnu/blob/main/bsd/sys/proc_info.h */
 type In4In6_addr struct /* struct in4in6_addr */ {
@@ -158,7 +163,7 @@ func Proc_listpids(
 	processIDListType ProcessIDListType,
 	processTypeInfo uint32,
 	buffer unsafe.Pointer,
-	bufferSize uint32) (r1, r2 uintptr, err syscall.Errno) {
+	bufferSize DarwinInt) (r1, r2 uintptr, err syscall.Errno) {
 	return syscall_syscall6(
 		libc_proc_listpids_trampoline_addr,
 		uintptr(processIDListType),
