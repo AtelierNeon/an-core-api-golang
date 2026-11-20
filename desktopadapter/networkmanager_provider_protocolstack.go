@@ -8,6 +8,13 @@ import (
 	"github.com/AtelierNeon/an-core-api-golang/networkmanager"
 )
 
+var (
+	networkManagerProviderProtocolStack_ipV4Any       = net.ParseIP("0.0.0.0")
+	networkManagerProviderProtocolStack_ipV4Localhost = net.ParseIP("127.0.0.1")
+	networkManagerProviderProtocolStack_ipV6Any       = net.ParseIP("::")
+	networkManagerProviderProtocolStack_ipV6Localhost = net.ParseIP("::1")
+)
+
 type NetworkManagerProviderProtocolStack struct {
 	networkmanager.ProtocolStack
 	localAddress string
