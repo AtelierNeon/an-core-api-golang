@@ -380,7 +380,7 @@ func Test_networkmanager_5_IsPortAvailableForLocalhost(t *testing.T) {
 	}
 }
 
-func Test_networkmanager_6_CheckPortBindingProcessIdForEveryAddress(t *testing.T) {
+func Test_networkmanager_6_CheckPortBindingProcessIDListForEveryAddress(t *testing.T) {
 	teardownSuite := setupSuite(t)
 	defer teardownSuite(t)
 
@@ -392,7 +392,7 @@ func Test_networkmanager_6_CheckPortBindingProcessIdForEveryAddress(t *testing.T
 	if err != nil {
 		t.Errorf("Error getter protocol stack error should be nil")
 	}
-	_, err = protocolStack.CheckPortBindingProcessID(0)
+	_, err = protocolStack.CheckPortBindingProcessIDList(0)
 	if err != nil {
 		t.Errorf("Error checking port binding error should be nil")
 	}

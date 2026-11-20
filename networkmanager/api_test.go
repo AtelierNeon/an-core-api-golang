@@ -91,7 +91,7 @@ func Test_5_IsPortAvailableForLocalhost(t *testing.T) {
 	}
 }
 
-func Test_6_CheckPortBindingProcessIdForEveryAddress(t *testing.T) {
+func Test_6_CheckPortBindingProcessIDListForEveryAddress(t *testing.T) {
 	networkManagerInst := networkmanager.GetInstance()
 	if networkManagerInst == nil {
 		t.Errorf("Error instance should NOT be nil")
@@ -100,7 +100,7 @@ func Test_6_CheckPortBindingProcessIdForEveryAddress(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error getter protocol stack error should be nil")
 	}
-	_, err = protocolStack.CheckPortBindingProcessID(0)
+	_, err = protocolStack.CheckPortBindingProcessIDList(0)
 	if err == nil {
 		t.Errorf("Error checking port binding error should NOT be nil")
 	}

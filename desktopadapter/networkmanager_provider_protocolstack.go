@@ -3,6 +3,7 @@ package desktopadapter
 import (
 	"fmt"
 	"net"
+	"strconv"
 
 	"github.com/AtelierNeon/an-core-api-golang/networkmanager"
 )
@@ -15,7 +16,7 @@ type NetworkManagerProviderProtocolStack struct {
 func (nmpps *NetworkManagerProviderProtocolStack) GetAvailablePort() (uint16, error) {
 	tcpAddr, err := net.ResolveTCPAddr(
 		"tcp",
-		fmt.Sprintf("%s:0", nmpps.localAddress),
+		net.JoinHostPort(nmpps.localAddress, "0"),
 	)
 	if err != nil {
 		return 0, err
@@ -41,7 +42,7 @@ func (nmpps *NetworkManagerProviderProtocolStack) GetAvailablePort() (uint16, er
 func (nmpps *NetworkManagerProviderProtocolStack) IsPortAvailable(port uint16) (bool, error) {
 	tcpAddr, err := net.ResolveTCPAddr(
 		"tcp",
-		fmt.Sprintf("%s:%d", nmpps.localAddress, port),
+		net.JoinHostPort(nmpps.localAddress, strconv.Itoa(int(port))),
 	)
 	if err != nil {
 		return false, err

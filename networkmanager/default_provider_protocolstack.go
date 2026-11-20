@@ -10,6 +10,10 @@ func (dpps *DefaultProviderProtocolStack) CheckPortBindingProcessID(port uint16)
 	return 0, errors.New("not implemented yet")
 }
 
+func (dpps *DefaultProviderProtocolStack) CheckPortBindingProcessIDList(port uint16) ([]int, error) {
+	return nil, errors.New("not implemented yet")
+}
+
 func (dpps *DefaultProviderProtocolStack) GetAvailablePort() (uint16, error) {
 	return 0, errors.New("not implemented yet")
 }
