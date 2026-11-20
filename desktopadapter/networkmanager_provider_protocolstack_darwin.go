@@ -3,6 +3,7 @@ package desktopadapter
 import (
 	"net"
 
+	"github.com/AtelierNeon/an-core-api-golang/interop"
 	"github.com/AtelierNeon/an-core-api-golang/interop/darwinlibproc"
 )
 
@@ -26,41 +27,82 @@ func (nmpps *NetworkManagerProviderProtocolStack) CheckPortBindingProcessIDList(
 		}
 
 		ipPortBindingLocalAddress := net.ParseIP(portBinding.LocalAddress)
-
-		if localAddress == "localhost" {
-			if ipPortBindingLocalAddress.Equal(networkManagerProviderProtocolStack_ipV4Localhost) || ipPortBindingLocalAddress.Equal(networkManagerProviderProtocolStack_ipV6Localhost) {
-				result = append(result, int(portBinding.OwnerProcessID))
-				continue
-			}
-
-			if ipPortBindingLocalAddress.Equal(networkManagerProviderProtocolStack_ipV4Any) || ipPortBindingLocalAddress.Equal(networkManagerProviderProtocolStack_ipV6Any) {
-				result = append(result, int(portBinding.OwnerProcessID))
-				continue
-			}
+		if ipPortBindingLocalAddress == nil {
+			continue
 		}
 
-		ipLocalAddress := net.ParseIP(localAddress)
+		if portBinding.Kind == interop.PortBindingKindTCP4 || portBinding.Kind == interop.PortBindingKindUDP4 {
+			if localAddress == "localhost" {
+				if ipPortBindingLocalAddress.Equal(networkManagerProviderProtocolStack_ipV4Localhost) {
+					result = append(result, int(portBinding.OwnerProcessID))
+					continue
+				}
 
-		if ipLocalAddress.Equal(networkManagerProviderProtocolStack_ipV4Localhost) {
-			if ipPortBindingLocalAddress.Equal(networkManagerProviderProtocolStack_ipV4Localhost) || ipPortBindingLocalAddress.Equal(networkManagerProviderProtocolStack_ipV4Any) {
-				result = append(result, int(portBinding.OwnerProcessID))
+				if ipPortBindingLocalAddress.Equal(networkManagerProviderProtocolStack_ipV4Any) {
+					result = append(result, int(portBinding.OwnerProcessID))
+					continue
+				}
+			}
+
+			ipLocalAddress := net.ParseIP(localAddress)
+			if ipLocalAddress == nil {
 				continue
 			}
-		}
-
-		if ipLocalAddress.Equal(networkManagerProviderProtocolStack_ipV6Localhost) {
-			if ipPortBindingLocalAddress.Equal(networkManagerProviderProtocolStack_ipV6Localhost) || ipPortBindingLocalAddress.Equal(networkManagerProviderProtocolStack_ipV6Any) {
-				result = append(result, int(portBinding.OwnerProcessID))
+			if ipLocalAddress.To4() == nil { // Skip non-IPv4 addresses for IPv4 bindings
 				continue
 			}
-		}
 
-		if ipLocalAddress.To4() != nil {
+			if ipLocalAddress.Equal(networkManagerProviderProtocolStack_ipV4Localhost) {
+				if ipPortBindingLocalAddress.Equal(networkManagerProviderProtocolStack_ipV4Localhost) {
+					result = append(result, int(portBinding.OwnerProcessID))
+					continue
+				}
+
+				if ipPortBindingLocalAddress.Equal(networkManagerProviderProtocolStack_ipV4Any) {
+					result = append(result, int(portBinding.OwnerProcessID))
+					continue
+				}
+			}
+
 			if ipPortBindingLocalAddress.Equal(ipLocalAddress) || ipPortBindingLocalAddress.Equal(networkManagerProviderProtocolStack_ipV4Any) {
 				result = append(result, int(portBinding.OwnerProcessID))
 				continue
 			}
-		} else {
+		}
+
+		if portBinding.Kind == interop.PortBindingKindTCP6 || portBinding.Kind == interop.PortBindingKindUDP6 {
+			if localAddress == "localhost" {
+				if ipPortBindingLocalAddress.Equal(networkManagerProviderProtocolStack_ipV6Localhost) {
+					result = append(result, int(portBinding.OwnerProcessID))
+					continue
+				}
+
+				if ipPortBindingLocalAddress.Equal(networkManagerProviderProtocolStack_ipV6Any) {
+					result = append(result, int(portBinding.OwnerProcessID))
+					continue
+				}
+			}
+
+			ipLocalAddress := net.ParseIP(localAddress)
+			if ipLocalAddress == nil {
+				continue
+			}
+			if ipLocalAddress.To4() != nil { // Skip IPv4 addresses for IPv6 bindings
+				continue
+			}
+
+			if ipLocalAddress.Equal(networkManagerProviderProtocolStack_ipV6Localhost) {
+				if ipPortBindingLocalAddress.Equal(networkManagerProviderProtocolStack_ipV6Localhost) {
+					result = append(result, int(portBinding.OwnerProcessID))
+					continue
+				}
+
+				if ipPortBindingLocalAddress.Equal(networkManagerProviderProtocolStack_ipV6Any) {
+					result = append(result, int(portBinding.OwnerProcessID))
+					continue
+				}
+			}
+
 			if ipPortBindingLocalAddress.Equal(ipLocalAddress) || ipPortBindingLocalAddress.Equal(networkManagerProviderProtocolStack_ipV6Any) {
 				result = append(result, int(portBinding.OwnerProcessID))
 				continue
