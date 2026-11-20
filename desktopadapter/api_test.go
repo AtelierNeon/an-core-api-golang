@@ -6,6 +6,7 @@ import (
 
 	"github.com/AtelierNeon/an-core-api-golang/desktopadapter"
 	"github.com/AtelierNeon/an-core-api-golang/logger"
+	"github.com/AtelierNeon/an-core-api-golang/networkmanager"
 	"github.com/AtelierNeon/an-core-api-golang/processmanager"
 )
 
@@ -273,5 +274,126 @@ func Test_processmanager_3_GetProcessPathById(t *testing.T) {
 	}
 	if processName == "" {
 		t.Errorf("Error running process path should not be empty")
+	}
+}
+
+func Test_networkmanager_0_GetInstance(t *testing.T) {
+	teardownSuite := setupSuite(t)
+	defer teardownSuite(t)
+
+	networkManagerInst := networkmanager.GetInstance()
+	if networkManagerInst == nil {
+		t.Errorf("Error instance should not be nil")
+	}
+	networkManagerInstAlt := networkmanager.GetInstance()
+	if networkManagerInstAlt == nil {
+		t.Errorf("Error instance should not be nil")
+	}
+	if networkManagerInst != networkManagerInstAlt {
+		t.Errorf("Error instance should be the same")
+	}
+}
+
+func Test_networkmanager_1_GetProtocolStackForEveryAddress(t *testing.T) {
+	teardownSuite := setupSuite(t)
+	defer teardownSuite(t)
+
+	networkManagerInst := networkmanager.GetInstance()
+	if networkManagerInst == nil {
+		t.Errorf("Error instance should NOT be nil")
+	}
+	_, err := networkManagerInst.GetProtocolStackForEveryLocalAddress()
+	if err != nil {
+		t.Errorf("Error getter protocol stack error should be nil")
+	}
+}
+
+func Test_networkmanager_2_GetAvailablePortForAllAddresses(t *testing.T) {
+	teardownSuite := setupSuite(t)
+	defer teardownSuite(t)
+
+	networkManagerInst := networkmanager.GetInstance()
+	if networkManagerInst == nil {
+		t.Errorf("Error instance should NOT be nil")
+	}
+	protocolStack, err := networkManagerInst.GetProtocolStackForEveryLocalAddress()
+	if err != nil {
+		t.Errorf("Error getter protocol stack error should be nil")
+	}
+	_, err = protocolStack.GetAvailablePort()
+	if err != nil {
+		t.Errorf("Error getter available port error should be nil")
+	}
+}
+
+func Test_networkmanager_3_GetAvailablePortForLocalhost(t *testing.T) {
+	teardownSuite := setupSuite(t)
+	defer teardownSuite(t)
+
+	networkManagerInst := networkmanager.GetInstance()
+	if networkManagerInst == nil {
+		t.Errorf("Error instance should NOT be nil")
+	}
+	protocolStack, err := networkManagerInst.GetProtocolStackForLocalhost()
+	if err != nil {
+		t.Errorf("Error getter protocol stack error should be nil")
+	}
+	_, err = protocolStack.GetAvailablePort()
+	if err != nil {
+		t.Errorf("Error getter available port error should be nil")
+	}
+}
+
+func Test_networkmanager_4_IsPortAvailableForEveryAddresses(t *testing.T) {
+	teardownSuite := setupSuite(t)
+	defer teardownSuite(t)
+
+	networkManagerInst := networkmanager.GetInstance()
+	if networkManagerInst == nil {
+		t.Errorf("Error instance should NOT be nil")
+	}
+	protocolStack, err := networkManagerInst.GetProtocolStackForEveryLocalAddress()
+	if err != nil {
+		t.Errorf("Error getter protocol stack error should be nil")
+	}
+	_, err = protocolStack.IsPortAvailable(0)
+	if err != nil {
+		t.Errorf("Error getter port availability error should be nil")
+	}
+}
+
+func Test_networkmanager_5_IsPortAvailableForLocalhost(t *testing.T) {
+	teardownSuite := setupSuite(t)
+	defer teardownSuite(t)
+
+	networkManagerInst := networkmanager.GetInstance()
+	if networkManagerInst == nil {
+		t.Errorf("Error instance should NOT be nil")
+	}
+	protocolStack, err := networkManagerInst.GetProtocolStackForLocalhost()
+	if err != nil {
+		t.Errorf("Error getter protocol stack error should be nil")
+	}
+	_, err = protocolStack.IsPortAvailable(0)
+	if err != nil {
+		t.Errorf("Error getter port availability error should be nil")
+	}
+}
+
+func Test_networkmanager_6_CheckPortBindingProcessIDListForEveryAddress(t *testing.T) {
+	teardownSuite := setupSuite(t)
+	defer teardownSuite(t)
+
+	networkManagerInst := networkmanager.GetInstance()
+	if networkManagerInst == nil {
+		t.Errorf("Error instance should NOT be nil")
+	}
+	protocolStack, err := networkManagerInst.GetProtocolStackForEveryLocalAddress()
+	if err != nil {
+		t.Errorf("Error getter protocol stack error should be nil")
+	}
+	_, err = protocolStack.CheckPortBindingProcessIDList(0)
+	if err != nil {
+		t.Errorf("Error checking port binding error should be nil")
 	}
 }

@@ -26,7 +26,7 @@ func (pmp *ProcessManagerProvider) OnIsCurrentProcessRunningAsNonUser() bool {
 
 	initProcessID := interop.GetInitProcessID()
 	parentProcessID := os.Getppid()
-	if parentProcessID == initProcessID {
+	if interop.ProcessID(parentProcessID) == initProcessID {
 		return true
 	}
 

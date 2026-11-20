@@ -7,19 +7,7 @@ import (
 	"github.com/AtelierNeon/an-core-api-golang/logger"
 )
 
-func setupSuite(tb testing.TB) func(tb testing.TB) {
-	// Something to setup
-	//logger.GetInstance().SetSeverity(logger.SeverityTypeInfo)
-
-	return func(tb testing.TB) {
-		// Something to teardown
-	}
-}
-
 func Test_0_GetInstance(t *testing.T) {
-	teardownSuite := setupSuite(t)
-	defer teardownSuite(t)
-
 	loggerInst := logger.GetInstance()
 	if loggerInst == nil {
 		t.Errorf("Error instance should not be nil")
@@ -34,9 +22,6 @@ func Test_0_GetInstance(t *testing.T) {
 }
 
 func Test_0_GetInstance_WithName(t *testing.T) {
-	teardownSuite := setupSuite(t)
-	defer teardownSuite(t)
-
 	loggerInst := logger.GetInstance()
 	if loggerInst == nil {
 		t.Errorf("Error instance should not be nil")
@@ -51,9 +36,6 @@ func Test_0_GetInstance_WithName(t *testing.T) {
 }
 
 func Test_0_GetInstance_WithType(t *testing.T) {
-	teardownSuite := setupSuite(t)
-	defer teardownSuite(t)
-
 	loggerInst := logger.GetInstance()
 	if loggerInst == nil {
 		t.Errorf("Error instance should not be nil")
@@ -68,9 +50,6 @@ func Test_0_GetInstance_WithType(t *testing.T) {
 }
 
 func Test_1_Debug(t *testing.T) {
-	teardownSuite := setupSuite(t)
-	defer teardownSuite(t)
-
 	loggerInst := logger.GetInstance()
 	if loggerInst == nil {
 		t.Errorf("Error instance should not be nil")
@@ -83,9 +62,6 @@ func Test_1_Debug(t *testing.T) {
 }
 
 func Test_2_Error(t *testing.T) {
-	teardownSuite := setupSuite(t)
-	defer teardownSuite(t)
-
 	loggerInst := logger.GetInstance()
 	if loggerInst == nil {
 		t.Errorf("Error instance should not be nil")
@@ -98,9 +74,6 @@ func Test_2_Error(t *testing.T) {
 }
 
 func Test_3_Fatal(t *testing.T) {
-	teardownSuite := setupSuite(t)
-	defer teardownSuite(t)
-
 	loggerInst := logger.GetInstance()
 	if loggerInst == nil {
 		t.Errorf("Error instance should not be nil")
@@ -113,9 +86,6 @@ func Test_3_Fatal(t *testing.T) {
 }
 
 func Test_4_Info(t *testing.T) {
-	teardownSuite := setupSuite(t)
-	defer teardownSuite(t)
-
 	loggerInst := logger.GetInstance()
 	if loggerInst == nil {
 		t.Errorf("Error instance should not be nil")
@@ -128,9 +98,6 @@ func Test_4_Info(t *testing.T) {
 }
 
 func Test_5_Trace(t *testing.T) {
-	teardownSuite := setupSuite(t)
-	defer teardownSuite(t)
-
 	loggerInst := logger.GetInstance()
 	if loggerInst == nil {
 		t.Errorf("Error instance should not be nil")
@@ -143,9 +110,6 @@ func Test_5_Trace(t *testing.T) {
 }
 
 func Test_6_Warn(t *testing.T) {
-	teardownSuite := setupSuite(t)
-	defer teardownSuite(t)
-
 	loggerInst := logger.GetInstance()
 	if loggerInst == nil {
 		t.Errorf("Error instance should not be nil")

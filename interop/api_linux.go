@@ -1,5 +1,9 @@
 package interop
 
-func GetInitProcessID() int {
+type LinuxPidT int32
+
+type ProcessID LinuxPidT
+
+func GetInitProcessID() ProcessID {
 	return 1
 }
